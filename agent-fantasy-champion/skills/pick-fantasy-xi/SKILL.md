@@ -1,18 +1,17 @@
 ---
 name: pick-fantasy-xi
-description: Optimize a legal 11-player Fantasy XI from the runtime player board.
+description: Optimize a legal 11-player Fantasy XI from the provided player board using read-only reasoning.
 ---
 
 # Mission
 
-Pick the highest expected value legal Fantasy XI while never violating the
-schema or roster rules.
+Pick the highest expected value legal Fantasy XI while never violating the schema or roster rules. Treat this skill as read-only reasoning over the provided board files.
 
 # Non-Negotiable Validity Rules
 
 - Use exactly 11 unique `player_id` strings from `/workspace/game-board/players.json`.
 - Every selected player must be eligible for the current `matchday_id`.
-- Every selected player should belong to a team playing in `matches.json`.
+- Every selected player should belong to a team playing in `/workspace/game-board/matches.json`.
 - Formation must be legal:
   - exactly 1 GK
   - 3 to 5 DEF
@@ -23,227 +22,186 @@ schema or roster rules.
 
 # Optimization Philosophy
 
-The tournament has no budget, captain, bench, or substitution step. That means
-expected points should dominate. Stack strong teams when justified. Do not
-diversify merely for aesthetics.
+The tournament has no budget, captain, bench, or substitution step. Expected points should dominate. Stack strong teams when justified. Do not diversify just to look balanced.
 
-Use this priority order:
+Priority order:
 
 1. Validity and likely minutes.
-2. Official or strongly predicted starters.
-3. High-upside attackers from favorites.
-4. Goalkeepers and defenders with clean sheet potential.
-5. Midfielders with set pieces, penalties, advanced role, or prior goals/assists.
-6. Prior World Cup or board stats when public data is missing.
-7. Avoid injuries, suspensions, bench-only players, and high card risk.
+2. Exact scoring-rule fit from `/workspace/rules/fantasy-xi.md`.
+3. Official or strongly predicted starters.
+4. High-upside attackers from favorites.
+5. Goalkeepers and defenders with clean sheet potential.
+6. Midfielders with set pieces, penalties, advanced role, or prior goals/assists.
+7. Prior World Cup or board stats when public data is missing.
+8. Avoid injuries, suspensions, bench-only players, and high card risk.
 
-# Board-Only Baseline Optimizer
+# Read The Scoring Rules First
 
-If public research is unavailable, run this as a baseline. You may improve the
-result with researched lineup/odds signals, but do not break validity.
+Before ranking players, read `/workspace/rules/fantasy-xi.md` and adjust the weights below to the actual point rules. Examples:
 
-```bash
-python - <<'PY'
-import json, os
-from pathlib import Path
+- If goals are heavily rewarded, raise forwards, penalty takers, and advanced midfielders.
+- If assists and chance creation matter, raise set-piece takers and creators.
+- If clean sheets matter, raise favored goalkeepers and defenders.
+- If saves matter, some underdog goalkeepers can be useful, but only if the clean-sheet gap is not decisive.
+- If cards or goals conceded are punished, downgrade high-card players and weak defensive stacks.
+- If minutes or starts are implied by scoring, prefer safer starters over uncertain stars.
 
-root = Path(os.environ.get("CONTAINER_WORKSPACE_DIR", "/workspace"))
+# Board-Only Scoring Procedure
 
-matchday = json.loads((root / "game-board" / "matchday.json").read_text())
-matches = json.loads((root / "game-board" / "matches.json").read_text())
-players = json.loads((root / "game-board" / "players.json").read_text())
-teams = json.loads((root / "game-board" / "teams.json").read_text())
+If public research is unavailable, use this manual scoring procedure as the baseline. Improve it with lineup and odds evidence only when the evidence is strong.
 
-matchday_id = matchday["matchday_id"]
-team_meta = {str(t["team_id"]): t for t in teams}
-playing_team_ids = {
-    str(m["home_team_id"]) for m in matches
-} | {
-    str(m["away_team_id"]) for m in matches
-}
+## Step 1: Build The Candidate Pool
 
-def number(value, default=0.0):
-    try:
-        return float(value)
-    except Exception:
-        return default
+- Read the current `matchday_id` from `/workspace/game-board/matchday.json`.
+- Read current match team IDs from `/workspace/game-board/matches.json`.
+- Keep only players from `/workspace/game-board/players.json` who:
+  - contain the current `matchday_id` in `eligible_matchday_ids`
+  - belong to one of the teams playing that matchday
+  - have position `GK`, `DEF`, `MID`, or `FWD`
 
-def prior(player):
-    return player.get("prior_stats") or player.get("prior_world_cup_record") or {}
+## Step 2: Estimate Team Strength
 
-def availability_score(player):
-    stats = prior(player)
-    apps = number(stats.get("appearances"), 0)
-    starts = number(stats.get("starts"), 0)
-    minutes = number(stats.get("minutes"), 0)
-    if apps > 0:
-        start_signal = min(1.0, (starts + 0.35) / (apps + 0.7))
-        minute_signal = min(1.0, minutes / max(90.0, apps * 90.0))
-    else:
-        start_signal = 0.55
-        minute_signal = 0.50
-    return 35 * start_signal + 20 * minute_signal
+For each playing team, estimate relative team strength from available board data:
 
-def team_strength_map():
-    raw = {}
-    for tid in playing_team_ids:
-        squad = [p for p in players if str(p.get("team_id")) == tid]
-        scored = 0.0
-        for p in squad:
-            st = prior(p)
-            scored += 4 * number(st.get("goals"))
-            scored += 3 * number(st.get("assists"))
-            scored += 0.01 * number(st.get("minutes"))
-            scored += 0.5 * number(st.get("starts"))
-        meta = team_meta.get(tid, {})
-        if (((meta.get("roster_checks") or {}).get("final_squad_shape")) is True):
-            scored += 4
-        raw[tid] = scored
-    if not raw:
-        return {}
-    lo, hi = min(raw.values()), max(raw.values())
-    if hi == lo:
-        return {tid: 0.55 for tid in raw}
-    return {tid: 0.25 + 0.75 * ((v - lo) / (hi - lo)) for tid, v in raw.items()}
+- Add credit for squad players with prior goals.
+- Add credit for prior assists.
+- Add credit for prior minutes and prior starts.
+- Add a small bonus when the team roster has `final_squad_shape` true.
+- Compare all playing teams and map them roughly into this range:
+  - 1.00 heavy favorite or strongest board profile
+  - 0.75 favorite
+  - 0.55 even or moderate
+  - 0.35 underdog
+  - 0.15 heavy underdog
 
-team_strength = team_strength_map()
+If public odds or reliable previews are available, use them to improve this team strength estimate.
 
-def player_score(player):
-    pos = player.get("position")
-    tid = str(player.get("team_id"))
-    stats = prior(player)
-    strength = team_strength.get(tid, 0.45)
+Also estimate match goal environment:
 
-    goals = number(stats.get("goals"))
-    assists = number(stats.get("assists"))
-    saves = number(stats.get("saves"))
-    yellow = number(stats.get("yellow_cards"))
-    red = number(stats.get("red_cards"))
-    starts = number(stats.get("starts"))
-    minutes = number(stats.get("minutes"))
-    attacking = goals * 7 + assists * 5 + min(6, minutes / 90.0) + starts
-    card_penalty = yellow * 1.2 + red * 5
+- High goal environment favors forwards, advanced midfielders, penalty takers, and match-level goal Risk Plays.
+- Low goal environment favors favorite GK and defenders, and makes early no-goal Risk Plays more attractive.
+- One-sided favorite environment supports stacking the favorite and considering team-based Risk Plays.
 
-    score = availability_score(player) + 10 * strength - card_penalty
-    if pos == "GK":
-        score += 18 * strength + 2.0 * saves
-    elif pos == "DEF":
-        score += 15 * strength + 2.5 * goals + 2.0 * assists
-    elif pos == "MID":
-        score += 8 * strength + 1.3 * attacking
-    elif pos == "FWD":
-        score += 10 * strength + 1.8 * attacking + 5 * goals
-    return score
+## Step 3: Estimate Player Availability
 
-eligible = []
-for p in players:
-    if matchday_id not in (p.get("eligible_matchday_ids") or []):
-        continue
-    if str(p.get("team_id")) not in playing_team_ids:
-        continue
-    if p.get("position") not in {"GK", "DEF", "MID", "FWD"}:
-        continue
-    row = dict(p)
-    row["_score"] = player_score(row)
-    eligible.append(row)
+For each candidate player, estimate likely minutes:
 
-by_pos = {}
-for pos in ["GK", "DEF", "MID", "FWD"]:
-    by_pos[pos] = sorted(
-        [p for p in eligible if p["position"] == pos],
-        key=lambda p: (p["_score"], p.get("display_name", "")),
-        reverse=True,
-    )
+- Official starter: very high availability.
+- Strong predicted starter: high availability.
+- Prior World Cup starter with strong minutes: high availability.
+- Prior substitute with limited minutes: medium to low availability.
+- Injured, suspended, unavailable, or absent from current squad news: remove from consideration.
+- Unknown player with no public signal: keep only as a fallback.
 
-formations = [
-    (3, 5, 2),
-    (4, 4, 2),
-    (3, 4, 3),
-    (4, 3, 3),
-    (5, 4, 1),
-    (5, 3, 2),
-    (3, 3, 3),
-]
+Board-only approximation:
 
-def roster_bonus(roster):
-    bonus = 0.0
-    gk = next((p for p in roster if p["position"] == "GK"), None)
-    if gk:
-        same_team_defs = [
-            p for p in roster
-            if p["position"] == "DEF" and str(p["team_id"]) == str(gk["team_id"])
-        ]
-        bonus += min(2, len(same_team_defs)) * 3.0 * team_strength.get(str(gk["team_id"]), 0.4)
+- More prior starts means higher availability.
+- More prior minutes per appearance means higher availability.
+- No prior stats means uncertain, not impossible.
 
-    attackers_by_team = {}
-    for p in roster:
-        if p["position"] in {"MID", "FWD"}:
-            attackers_by_team.setdefault(str(p["team_id"]), 0)
-            attackers_by_team[str(p["team_id"])] += 1
-    for tid, count in attackers_by_team.items():
-        if count >= 2:
-            bonus += min(count, 4) * 2.5 * team_strength.get(tid, 0.4)
-    return bonus
+## Step 4: Score Players By Position
 
-best = None
-for d_count, m_count, f_count in formations:
-    if not by_pos["GK"] or len(by_pos["DEF"]) < d_count or len(by_pos["MID"]) < m_count or len(by_pos["FWD"]) < f_count:
-        continue
-    roster = (
-        by_pos["GK"][:1]
-        + by_pos["DEF"][:d_count]
-        + by_pos["MID"][:m_count]
-        + by_pos["FWD"][:f_count]
-    )
-    total = sum(p["_score"] for p in roster) + roster_bonus(roster)
-    if best is None or total > best[0]:
-        best = (total, roster, (d_count, m_count, f_count))
+Use these scoring instincts, then rank each position separately.
 
-if not best:
-    raise SystemExit("No legal roster can be built from the board.")
+Goalkeepers:
 
-total, roster, formation = best
-print("matchday_id:", matchday_id)
-print("formation: 1-%d-%d-%d" % formation)
-print("score:", round(total, 2))
-for p in roster:
-    print(p["position"], p["player_id"], p.get("display_name"), "team", p.get("team_id"), "score", round(p["_score"], 2))
-print("fantasy_xi:", json.dumps([str(p["player_id"]) for p in roster]))
-PY
-```
+- Favor high start probability first.
+- Favor stronger teams and clean sheet chance.
+- Add value for prior saves when available.
+- Avoid keepers from heavy underdogs unless save volume is likely and clean sheet edges are weak.
 
-# Improve The Baseline With Public Intelligence
+Defenders:
 
-After the baseline, adjust only when evidence is strong:
+- Favor likely starters on teams with clean sheet potential.
+- Prefer defenders with prior goals, assists, set-piece threat, or attacking fullback role.
+- Penalize high card risk.
 
-- Replace a non-starter with a confirmed or highly likely starter at the same
-  position.
-- Upgrade to penalty takers, set-piece takers, elite creators, and central
-  forwards from favorites.
-- Prefer a favorite goalkeeper over an underdog goalkeeper unless the underdog
-  keeper is expected to face many shots and clean sheet odds are not decisive.
-- For defenders, favor clean sheet probability first, then attacking fullbacks or
-  set-piece threats.
-- For midfielders, favor advanced role, set pieces, penalties, recent goal
-  involvement, and reliable minutes.
+Midfielders:
+
+- Favor advanced midfielders, penalty takers, set-piece takers, and creators.
+- Add value for prior goals, assists, starts, and minutes.
+- Defensive midfielders are acceptable only when they are reliable starters and needed for validity.
+
+Forwards:
+
+- Favor confirmed or likely starting forwards on favorites.
+- Strongly favor penalty takers, central strikers, elite wide forwards, and players with prior goals or assists.
+- Avoid rotation forwards unless public evidence suggests they start.
+
+## Step 5: Apply Correlation Logic
+
+Use correlation to lift the whole lineup:
+
+- Positive correlation: GK plus 1 or 2 defenders from a favorite with clean sheet potential.
+- Positive correlation: multiple attackers from a favorite or high-total match.
+- Positive correlation: an attacker stack plus a Risk Play that expects goals in the same match, if the claim has strong value.
+- Negative correlation: do not overload attackers against your chosen GK or defensive stack unless that attacker is clearly elite and the match is expected to be open.
+- Negative correlation: avoid mixing a clean-sheet defensive stack with a Risk Play that depends on that opponent scoring.
+
+# Formation Search
+
+Evaluate these legal shapes and choose the best total expected value:
+
+- 1-3-5-2
+- 1-4-4-2
+- 1-3-4-3
+- 1-4-3-3
+- 1-4-5-1
+- 1-5-4-1
+- 1-5-3-2
+
+For each shape:
+
+- Take the best available GK.
+- Take the required number of best DEF, MID, and FWD candidates.
+- Prefer a different shape if it admits clearly stronger attackers or avoids weak low-minute players.
+- Default to 1-4-4-2 when scores are close.
+
+# Stacking Bonuses
+
+Stacking is allowed because there is no budget.
+
+- Add value for GK plus 1 or 2 defenders from a favorite with clean sheet chance.
+- Add value for 2 to 4 attackers from the strongest high-goal team.
+- Use 2 to 5 players from a clearly superior team if they are likely starters.
+- Do not stack uncertain bench players.
+- Avoid exceeding 5 players from one team unless the board is thin or that team has overwhelming matchup quality.
+
+# Improve With Public Intelligence
+
+After the board-only ranking, adjust only when evidence is strong:
+
+- Replace a non-starter with a confirmed or highly likely starter at the same position.
+- Upgrade to penalty takers, set-piece takers, elite creators, and central forwards from favorites.
+- Prefer a favorite goalkeeper over an underdog goalkeeper unless the underdog keeper is expected to face many shots and clean sheet odds are not decisive.
+- For defenders, favor clean sheet probability first, then attacking fullbacks or set-piece threats.
+- For midfielders, favor advanced role, set pieces, penalties, recent goal involvement, and reliable minutes.
 - For forwards, favor goal probability and start probability above everything.
 
-# Aggressive But Safe Stacking
+# Tie Breakers
 
-Because there is no budget, stacking the best teams is allowed.
+When two players are close:
 
-- Use 2 to 5 players from a clearly superior team if they are likely starters.
-- Use GK plus 1 or 2 defenders from a favorite when clean sheet chances are high.
-- Use 2 to 4 attackers from the highest goal-environment favorite.
-- Do not stack uncertain bench players.
+1. Prefer official starter.
+2. Prefer better team strength.
+3. Prefer higher goal or assist upside.
+4. Prefer safer minutes.
+5. Prefer lower card risk.
+6. Prefer the player whose match has a higher goal environment.
+
+# Final Self-Check
+
+Before setting `fantasy_xi`, mentally count positions and IDs:
+
+- 11 total players.
+- 11 unique player IDs.
+- 1 GK.
+- 3 to 5 DEF.
+- 3 to 5 MID.
+- 1 to 3 FWD.
+- All IDs are from `players.json`.
+- All players are eligible for the current matchday.
 
 # Final Fantasy XI Output
 
-Produce `fantasy_xi` as an array of 11 strings:
-
-```json
-["player_id_1", "player_id_2", "player_id_3", "player_id_4", "player_id_5", "player_id_6", "player_id_7", "player_id_8", "player_id_9", "player_id_10", "player_id_11"]
-```
-
-Do not include player names, positions, or explanations inside the array.
-
+Set `fantasy_xi` to an array of 11 player ID strings only. Do not include player names, positions, notes, or ranking details inside the array.

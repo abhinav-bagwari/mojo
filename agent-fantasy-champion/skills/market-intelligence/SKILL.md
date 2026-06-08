@@ -23,15 +23,39 @@ must still submit a valid JSON answer.
 - `/workspace/game-board/matches.json`
 - `/workspace/game-board/players.json`
 - `/workspace/game-board/teams.json`
+- `/workspace/game-board/standings-before.json`
 - `/workspace/game-board/claim-catalog.json`
 - `/workspace/rules/fantasy-xi.md`
 - `/workspace/rules/risk-play.md`
+- `/workspace/rules/bracket-play.md`
 - `/workspace/output-format/daily-submission.schema.json`
+- `/workspace/output-format/examples/daily-submission.json`
+- `/workspace/team/README.md` when present
+- every `/workspace/team/**/SKILL.md`
 
-Use `{CONTAINER_WORKSPACE_DIR}` in shell commands if the prompt provides it.
-Otherwise use `/workspace`.
+Use the `/workspace` paths exactly as provided by the platform.
 
-# Research Targets
+# Workspace Contract
+
+Use every provided file for its intended role:
+
+- `matchday.json` provides the matchday ID and lock timing.
+- `matches.json` provides match IDs and playing teams.
+- `players.json` is the only valid source for Fantasy XI player IDs.
+- `teams.json` provides team IDs, names, roster metadata, and team context.
+- `standings-before.json` informs risk appetite based on tournament position.
+- `claim-catalog.json` is the only valid source for Risk Play claims and
+  required fields.
+- `fantasy-xi.md` and `risk-play.md` define scoring and validity rules.
+- `bracket-play.md` matters when bracket play is open.
+- `daily-submission.schema.json` is the final output contract.
+- `daily-submission.json` shows the expected answer shape.
+- Team README and skill files are the team's strategy instructions.
+
+Do not add bracket picks unless the current workspace and output schema make
+bracket play active for this run.
+
+# Research Plan
 
 For each match in `matches.json`, build a compact mental table:
 
@@ -45,6 +69,18 @@ For each match in `matches.json`, build a compact mental table:
   start.
 - Official lineups if kickoff is close. Official lineups outrank all predictions.
 
+Research priority:
+
+1. Official lineups or official team announcements when available.
+2. Current injury, suspension, and squad availability news.
+3. Probable lineups from reputable match previews.
+4. Betting or consensus market view for favorite, clean sheet, and goal total.
+5. Recent form, role, set pieces, penalties, and goal involvement.
+
+Do not spend equal time on every player. First identify the likely best teams and
+highest-total matches, then focus research on their starters and primary
+attackers.
+
 # Good Public Sources
 
 Prefer sources that are current and specific:
@@ -56,8 +92,8 @@ Prefer sources that are current and specific:
   signals.
 - Recent player/team news for injuries, suspension, and role changes.
 
-Do not use sources that require credentials. Do not assume a page is current
-unless its date clearly applies to the matchday.
+Use only public pages that do not require sign-in. Do not assume a page is
+current unless its date clearly applies to the matchday.
 
 # Convert Research Into Signals
 
@@ -91,6 +127,19 @@ Use these approximate values when scoring players:
   - 0.50 advanced role with some goal involvement.
   - 0.25 defensive or low-output role.
 
+# Match-Level Signals
+
+For each match, keep these signals in mind:
+
+- Favorite strength: how likely one team is to control the match.
+- Goal total: whether attackers or clean-sheet defenders deserve more weight.
+- Lineup certainty: how reliable the starting information is.
+- Tactical mismatch: whether one team has a clear attacking edge.
+- Card intensity: whether the match profile supports card-based Risk Plays.
+
+Use these signals to help `pick-fantasy-xi` and `choose-risk-play` make a
+coherent decision rather than two unrelated choices.
+
 # Conflict Rules
 
 - Board IDs and eligibility always win over public names. If a researched player
@@ -100,4 +149,5 @@ Use these approximate values when scoring players:
 - If a player has great reputation but low start probability, downgrade them.
 - If a player has weak public data but strong board prior stats and likely starts,
   keep them in contention.
-
+- If public research is stale or unclear, rely on the current board, rules, and
+  conservative validity.

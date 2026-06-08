@@ -5,9 +5,12 @@ description: Select the best optional Risk Play using expected value and tournam
 
 # Mission
 
-Choose one positive expected value Risk Play or return `null`. Risk Play can win
-the tournament, but a bad or invalid claim burns points. Never choose risk just
-to look active.
+Choose one positive expected value Risk Play or return `null`. Risk Play can
+help win the tournament, but a bad or invalid claim burns points. Never choose a
+risk just to look active.
+
+The best Risk Play is not always the most exciting one. It is the claim with the
+best mix of probability, payout, standings need, and validity confidence.
 
 # Required Inputs
 
@@ -23,7 +26,7 @@ Read:
 # Validity Rules
 
 - `risk_play: null` is valid.
-- If choosing a claim, `claim_id` must exist in `claim-catalog.json`.
+- If choosing a claim, `claim_id` must exist in `/workspace/game-board/claim-catalog.json`.
 - Include every required field for the selected claim.
 - Use valid `match_id`, `team_id`, and `player_id` values from the board.
 - Do not include `stake`, `bet_points`, or `stake_percent`.
@@ -35,22 +38,23 @@ Read:
 - Yellow risks 25 percent of current points.
 - Red risks 35 percent of current points.
 
-Expected value is roughly:
-
-```text
-stake_percent * (2 * probability_of_success - 1)
-```
-
-Because probability estimates are noisy, use conservative thresholds:
+Expected value is roughly stake percent multiplied by two times success
+probability minus one. Because probability estimates are noisy, use conservative
+thresholds:
 
 - Green: choose if estimated probability is at least 0.62.
 - Yellow: choose if estimated probability is at least 0.70.
 - Red: choose if estimated probability is at least 0.82, or at least 0.76 only
   when standings show the team needs a large catch-up play.
 
+When the current team has little or no accumulated score, the downside of Risk
+Play may be smaller, so a strong Green or Yellow claim can be worthwhile. When
+the team is already near the top, protect the lead and avoid fragile Red claims.
+
 # Tournament Position Adjustment
 
-Use `standings-before.json` if it contains the current `team_id`.
+Use `/workspace/game-board/standings-before.json` if it contains the current
+`team_id`.
 
 - If rank is top 20 percent or tournament total is near the lead, prefer Green or
   `null`.
@@ -66,7 +70,7 @@ Prefer claims with stable event rates and low validation ambiguity:
 
 1. `no_goal_first_10` on a match where both teams start cautiously or where the
    underdog is likely to sit deep.
-2. `match_2plus_goals` on a favorite/high-total match.
+2. `match_2plus_goals` on a favorite or high-total match.
 3. `goal_before_halftime` on a high-tempo favorite match.
 4. `match_2plus_cards` or `match_2plus_yellow_cards` on intense rivalry,
    knockout, high-foul, or underdog-defense profiles.
@@ -74,6 +78,15 @@ Prefer claims with stable event rates and low validation ambiguity:
    vulnerable.
 6. `team_scores_first` only for a strong favorite with reliable early pressure.
 7. `player_scores` only for a confirmed starting penalty taker or elite striker.
+
+Use the Fantasy XI as supporting evidence:
+
+- If the lineup stacks favorite attackers in one match, `match_2plus_goals` or
+  `goal_before_halftime` may align well.
+- If the lineup stacks GK and defenders from a favorite, avoid a Risk Play that
+  needs the opposing team to score.
+- If a player is selected mainly for penalty or striker upside, `player_scores`
+  can be considered only with very strong starter and role evidence.
 
 Avoid unless very strong evidence:
 
@@ -87,51 +100,36 @@ Avoid unless very strong evidence:
 
 # Safe Default
 
-If no claim is clearly strong but Green claims exist, prefer:
+If no claim is clearly strong but Green claims exist, prefer `no_goal_first_10`
+on the lowest early-goal-risk match. Choose that match by looking for cautious
+teams, low goal environment, underdog defensive posture, or lack of elite early
+scorers.
 
-```json
-{
-  "claim_id": "no_goal_first_10",
-  "match_id": "<lowest early-goal-risk match_id>"
-}
-```
+If even that is uncertain or the claim is unavailable, return `null`.
 
-Choose the lowest early-goal-risk match by looking for cautious teams, low goal
-environment, underdog defensive posture, or lack of elite early scorers.
+# Final Risk Decision
 
-If even that is uncertain or the claim is unavailable, return:
+Choose in this order:
 
-```json
-null
-```
+1. Highest-confidence positive-value Green claim.
+2. Very strong Yellow claim when probability and standings justify it.
+3. Red claim only when the team needs a large catch-up play and the evidence is
+   exceptional.
+4. `null` when no claim clears the threshold.
 
-# Required Field Map
+# Required Field Guide
 
-Use `claim-catalog.json` as source of truth. Common shapes:
+Use `/workspace/game-board/claim-catalog.json` as source of truth.
 
-```json
-{"claim_id": "match_2plus_goals", "match_id": "1489371"}
-```
-
-```json
-{"claim_id": "no_goal_first_10", "match_id": "1489371"}
-```
-
-```json
-{"claim_id": "team_scores_first", "match_id": "1489371", "team_id": "6"}
-```
-
-```json
-{"claim_id": "player_scores", "match_id": "1489371", "player_id": "762"}
-```
-
-```json
-{"claim_id": "exact_score", "match_id": "1489371", "home_score": 2, "away_score": 1}
-```
+- Match-level claims such as `match_2plus_goals` and `no_goal_first_10` need
+  `claim_id` and `match_id`.
+- Team-level claims such as `team_scores_first` need `claim_id`, `match_id`, and
+  `team_id`.
+- Player scoring claims need `claim_id`, `match_id`, and `player_id`.
+- Exact score claims need `claim_id`, `match_id`, `home_score`, and `away_score`.
 
 # Final Risk Policy
 
 Pick the highest risk-adjusted expected value claim, not the flashiest claim.
 When probabilities are close, pick the Green claim. When validity is uncertain,
 return `null`.
-

@@ -1,114 +1,93 @@
 ---
 name: final-answer-audit
-description: Validate the final daily submission JSON before returning it.
+description: Validate the final daily submission JSON using a manual checklist before returning it.
 ---
 
 # Mission
 
-Before final output, audit the candidate answer. The final response must be one
-JSON object and nothing else.
+Before final output, audit the candidate answer using read-only reasoning. The
+final response must be one JSON object and nothing else.
 
 # Required Final Shape
 
-```json
-{
-  "team_id": "runtime-team-id",
-  "matchday_id": "runtime-matchday-id",
-  "fantasy_xi": ["11", "unique", "player", "ids"],
-  "risk_play": null,
-  "strategy": "Short explanation."
-}
-```
+The final object must contain:
 
-`risk_play` may also be an object with a valid `claim_id` and required fields.
+- `team_id`: the exact team ID supplied by the platform request.
+- `matchday_id`: the exact ID from `/workspace/game-board/matchday.json`.
+- `fantasy_xi`: exactly 11 unique player ID strings.
+- `risk_play`: either `null` or one valid claim object.
+- `strategy`: one short explanation sentence.
 
 # Team ID
 
-Use the exact team ID supplied by the runtime request or system prompt. Do not
-use `example-team`, `cris-team`, or any sample value unless that is the actual
-runtime team ID.
+Use the exact team ID supplied by the platform request. Do not use
+`example-team`, `cris-team`, or any sample value unless that is the actual team
+ID for the current platform request.
 
-# Audit Checklist
+# Manual Audit Checklist
 
 Verify all of this before returning:
 
-- Top-level object has `team_id`, `matchday_id`, `fantasy_xi`, optional
-  `risk_play`, and `strategy`.
-- `team_id` is non-empty and matches the runtime request.
-- `matchday_id` equals `/workspace/game-board/matchday.json`.
-- `fantasy_xi` has exactly 11 strings.
+- The answer follows `/workspace/output-format/daily-submission.schema.json`.
+- The current `/workspace/rules/fantasy-xi.md` and
+  `/workspace/rules/risk-play.md` were applied.
+- `/workspace/rules/bracket-play.md` was considered only for active bracket
+  requirements.
+- The example in `/workspace/output-format/examples/daily-submission.json` was
+  used only as a shape guide, not as a source of sample IDs.
+- Top-level object has `team_id`, `matchday_id`, `fantasy_xi`, `risk_play`, and
+  `strategy`.
+- No extra top-level fields are present unless the schema explicitly requires
+  them.
+- `team_id` is non-empty and matches the platform request.
+- `matchday_id` equals the value in `/workspace/game-board/matchday.json`.
+- `fantasy_xi` has exactly 11 entries.
+- Every `fantasy_xi` entry is a string.
 - All 11 `fantasy_xi` values are unique.
 - Every selected ID exists in `/workspace/game-board/players.json`.
 - Every selected player is eligible for the current `matchday_id`.
-- Formation is legal: 1 GK, 3 to 5 DEF, 3 to 5 MID, 1 to 3 FWD.
-- If `risk_play` is not null, `claim_id` exists in `claim-catalog.json`.
-- If `risk_play` is not null, every required field is present.
-- Every risk `match_id`, `team_id`, and `player_id` is valid.
-- No `stake`, `bet_points`, `stake_percent`, comments, Markdown, or extra prose.
-- `strategy` is concise and explains the selection logic and risk posture.
+- Formation is legal:
+  - 1 GK
+  - 3 to 5 DEF
+  - 3 to 5 MID
+  - 1 to 3 FWD
+- If `risk_play` is `null`, that is valid.
+- If `risk_play` is not `null`, `claim_id` exists in `/workspace/game-board/claim-catalog.json`.
+- If `risk_play` is not `null`, every required field from the selected claim is
+  present.
+- Every risk `match_id`, `team_id`, and `player_id` exists in the board files.
+- Risk play does not include `stake`, `bet_points`, or `stake_percent`.
+- Bracket fields are absent unless the current schema and bracket board require
+  bracket play for this run.
+- Final answer has no Markdown, no comments, no explanations outside the JSON
+  object, and no trailing notes.
+- `strategy` is concise and mentions the selection logic and risk posture.
 
-# Manual Validation Snippet
+# Strategy Sentence
 
-If possible, validate a drafted answer with this script before final output.
-Replace `ANSWER_JSON_HERE` with the candidate object.
+The `strategy` value should briefly explain why the lineup should score well:
 
-```bash
-python - <<'PY'
-import json, os
-from pathlib import Path
+- formation shape
+- starter and scoring-rule logic
+- main team or attacking stack
+- risk posture
 
-answer = json.loads(r'''ANSWER_JSON_HERE''')
-root = Path(os.environ.get("CONTAINER_WORKSPACE_DIR", "/workspace"))
+Keep it short. Do not include private reasoning or long analysis.
 
-matchday = json.loads((root / "game-board" / "matchday.json").read_text())
-players = json.loads((root / "game-board" / "players.json").read_text())
-claims = json.loads((root / "game-board" / "claim-catalog.json").read_text())
-matches = json.loads((root / "game-board" / "matches.json").read_text())
-teams = json.loads((root / "game-board" / "teams.json").read_text())
+# Risk Object Review
 
-player_by_id = {str(p["player_id"]): p for p in players}
-claim_by_id = {str(c["claim_id"]): c for c in claims}
-match_ids = {str(m["match_id"]) for m in matches}
-team_ids = {str(t["team_id"]) for t in teams}
+Use `/workspace/game-board/claim-catalog.json` as the only source of truth for
+required risk fields.
 
-assert answer["matchday_id"] == matchday["matchday_id"]
-xi = [str(x) for x in answer["fantasy_xi"]]
-assert len(xi) == 11
-assert len(set(xi)) == 11
+Examples of valid shapes described in prose:
 
-positions = {"GK": 0, "DEF": 0, "MID": 0, "FWD": 0}
-for pid in xi:
-    assert pid in player_by_id, pid
-    player = player_by_id[pid]
-    assert answer["matchday_id"] in (player.get("eligible_matchday_ids") or []), pid
-    positions[player["position"]] += 1
-
-assert positions["GK"] == 1, positions
-assert 3 <= positions["DEF"] <= 5, positions
-assert 3 <= positions["MID"] <= 5, positions
-assert 1 <= positions["FWD"] <= 3, positions
-
-risk = answer.get("risk_play")
-if risk is not None:
-    assert "stake" not in risk
-    assert "bet_points" not in risk
-    assert "stake_percent" not in risk
-    claim = claim_by_id[str(risk["claim_id"])]
-    for field in claim["required_fields"]:
-        assert field in risk, (field, risk)
-    if "match_id" in risk:
-        assert str(risk["match_id"]) in match_ids
-    if "team_id" in risk:
-        assert str(risk["team_id"]) in team_ids
-    if "player_id" in risk:
-        assert str(risk["player_id"]) in player_by_id
-
-print("valid", positions)
-PY
-```
+- A match-level Green claim needs `claim_id` and `match_id`.
+- A team-level claim needs `claim_id`, `match_id`, and `team_id`.
+- A player scoring claim needs `claim_id`, `match_id`, and `player_id`.
+- An exact score claim needs `claim_id`, `match_id`, `home_score`, and
+  `away_score`.
 
 # Final Output Rule
 
-Return exactly one JSON object. No Markdown fence. No explanation before or
-after. No comments.
-
+Return exactly one JSON object. Do not wrap it in a Markdown fence. Do not add
+any explanation before or after the object.
