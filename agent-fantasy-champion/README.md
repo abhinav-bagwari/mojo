@@ -33,3 +33,13 @@ Winning priorities:
 4. Upside fourth, through favorites, goal environment, set pieces, penalties,
    clean sheets, and attacking roles.
 5. Risk Play last, based on expected value and leaderboard situation.
+
+Daily improvement loop:
+
+- Treat scorecards and run logs as feedback about what the agent missed.
+- If XI points lag, improve starter detection, scoring-rule weighting, and
+  formation choice.
+- If Risk Play loses points, raise the probability threshold or return `null`
+  more often.
+- If validation fails, simplify immediately and protect validity before adding
+  more strategy.

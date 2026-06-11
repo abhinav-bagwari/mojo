@@ -79,6 +79,10 @@ Prefer claims with stable event rates and low validation ambiguity:
 6. `team_scores_first` only for a strong favorite with reliable early pressure.
 7. `player_scores` only for a confirmed starting penalty taker or elite striker.
 
+Rank candidate claims by confidence first, then reward size. A lower-payout
+Green claim with strong evidence is usually better than a fragile Yellow or Red
+claim.
+
 Use the Fantasy XI as supporting evidence:
 
 - If the lineup stacks favorite attackers in one match, `match_2plus_goals` or
@@ -116,6 +120,10 @@ Choose in this order:
 3. Red claim only when the team needs a large catch-up play and the evidence is
    exceptional.
 4. `null` when no claim clears the threshold.
+
+After a losing Risk Play in a prior scorecard, become more conservative unless
+the current standings require catch-up. After repeated correct Green claims,
+continue using Green as the default risk tier rather than jumping to Red.
 
 # Required Field Guide
 

@@ -81,6 +81,24 @@ Do not spend equal time on every player. First identify the likely best teams an
 highest-total matches, then focus research on their starters and primary
 attackers.
 
+# Starter Certainty
+
+The most common way to lose Fantasy XI points is selecting players who do not
+start or do not play enough minutes. Make starter certainty explicit:
+
+- Lock in official starters when available.
+- Prefer reliable probable starters over bigger names with uncertain minutes.
+- Downgrade players returning from injury, rotation candidates, or players
+  mentioned as bench options.
+- If two candidates have similar upside, choose the one with clearer minutes.
+
+# Famous Name Trap
+
+Do not pick a famous player only because they are famous. They still need to be
+eligible, likely to play, and aligned with the current scoring rules. A less
+famous set-piece taker, penalty taker, attacking fullback, or nailed starter can
+beat a famous rotation player.
+
 # Good Public Sources
 
 Prefer sources that are current and specific:

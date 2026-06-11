@@ -157,6 +157,19 @@ For each shape:
 - Prefer a different shape if it admits clearly stronger attackers or avoids weak low-minute players.
 - Default to 1-4-4-2 when scores are close.
 
+# Formation Selection Guide
+
+Let the rules and match environment drive formation:
+
+- If goals and assists are the dominant scoring path, prefer 1-3-4-3, 1-3-5-2,
+  or 1-4-3-3 when strong attackers are available.
+- If clean sheets are valuable and there is a clear defensive favorite, prefer
+  1-4-4-2, 1-5-3-2, or 1-5-4-1 only when the defender pool is strong.
+- If midfielder scoring is broad because of assists, set pieces, and minutes,
+  prefer 1-3-5-2 or 1-4-5-1.
+- If the board has weak forward options, do not force three forwards.
+- If the board has weak defenders, do not force five defenders.
+
 # Stacking Bonuses
 
 Stacking is allowed because there is no budget.
@@ -166,6 +179,19 @@ Stacking is allowed because there is no budget.
 - Use 2 to 5 players from a clearly superior team if they are likely starters.
 - Do not stack uncertain bench players.
 - Avoid exceeding 5 players from one team unless the board is thin or that team has overwhelming matchup quality.
+
+# Portfolio Balance
+
+Build a lineup with multiple scoring paths:
+
+- At least one clean-sheet path through a goalkeeper or defender stack when the
+  match slate offers a clear favorite.
+- At least four players with real goal or assist upside when the board allows it.
+- At least one set-piece, penalty, or primary-creator profile when available.
+- Avoid filling the XI with low-upside defensive midfielders unless they are
+  needed for validity and minutes safety.
+- Avoid picking both a goalkeeper and several opposing attackers unless the
+  attacker upside is clearly worth the negative correlation.
 
 # Improve With Public Intelligence
 

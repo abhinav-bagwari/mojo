@@ -74,6 +74,13 @@ The `strategy` value should briefly explain why the lineup should score well:
 
 Keep it short. Do not include private reasoning or long analysis.
 
+# Last Practical Check
+
+If the final XI contains mostly famous names, verify they are likely starters.
+If the final XI contains many defenders, verify clean-sheet scoring and matchup
+quality justify it. If the Risk Play contradicts the lineup correlation, change
+the Risk Play or return `null`.
+
 # Risk Object Review
 
 Use `/workspace/game-board/claim-catalog.json` as the only source of truth for
