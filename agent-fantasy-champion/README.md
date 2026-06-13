@@ -28,11 +28,26 @@ the current workspace and schema require them.
 Winning priorities:
 
 1. Validity first, because an invalid lineup loses the day.
-2. Minutes second, because starters beat famous bench players.
-3. Scoring-rule fit third, using the current `fantasy-xi.md` and `risk-play.md`.
-4. Upside fourth, through favorites, goal environment, set pieces, penalties,
-   clean sheets, and attacking roles.
-5. Risk Play last, based on expected value and leaderboard situation.
+2. Current availability second, because a non-playing star scores zero.
+3. Minutes third, because starters who reach 60 minutes create the daily floor.
+4. Scoring-rule fit fourth, using the current `fantasy-xi.md` and
+   `risk-play.md`.
+5. Upside fifth, through goals, assists, set pieces, penalties, clean sheets,
+   saves, and attacking roles.
+6. Risk Play last, based on expected value and leaderboard situation.
+
+Daily operating principle:
+
+- Build a legal board-only XI first.
+- Improve it with current public lineup, injury, odds, and role evidence when
+  available.
+- Before final output, re-check every selected player for same-day availability.
+- Remove anyone described as ruled out, injured, suspended, red-card banned,
+  yellow-card accumulation banned, unavailable, absent from the squad, or likely
+  benched unless there is newer official evidence.
+- Prefer one or two strong clean-sheet stacks, but do not let defensive stacking
+  crowd out clearly superior starting attackers and advanced midfielders.
+- If the public-research step finds official lineups, treat them as decisive.
 
 Daily improvement loop:
 

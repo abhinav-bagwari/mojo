@@ -33,7 +33,13 @@ Priority order:
 5. Goalkeepers and defenders with clean sheet potential.
 6. Midfielders with set pieces, penalties, advanced role, or prior goals/assists.
 7. Prior World Cup or board stats when public data is missing.
-8. Avoid injuries, suspensions, bench-only players, and high card risk.
+8. Avoid injuries, suspensions, red-card bans, yellow-card accumulation bans,
+   bench-only players, and high card risk.
+
+Hard rule: never keep a player with current evidence that they are ruled out,
+injured, suspended, red-card banned, yellow-card accumulation banned,
+unavailable, absent from the squad, or expected not to start. That player scores
+too close to zero to justify the pick.
 
 # Read The Scoring Rules First
 
@@ -45,6 +51,32 @@ Before ranking players, read `/workspace/rules/fantasy-xi.md` and adjust the wei
 - If saves matter, some underdog goalkeepers can be useful, but only if the clean-sheet gap is not decisive.
 - If cards or goals conceded are punished, downgrade high-card players and weak defensive stacks.
 - If minutes or starts are implied by scoring, prefer safer starters over uncertain stars.
+
+# Expected Points Model
+
+Use the exact scoring rules in `/workspace/rules/fantasy-xi.md`. If the current
+rules match the common tournament rules, rank players with this mental model:
+
+- start floor: `2 * start_probability`
+- 60-minute floor: `2 * sixty_minute_probability`
+- goals: `6 * goal_probability`
+- assists: `4 * assist_probability`
+- clean sheet for GK/DEF: `4 * clean_sheet_probability`
+- GK save bonus: `2 * three_save_probability`
+- cards and own goals: subtract expected yellow, red, and own-goal penalties
+
+Do not overfit the numbers. The purpose is to compare options:
+
+- A safe starter who reaches 60 minutes is usually worth about 4 points before
+  events.
+- A defender or goalkeeper from a strong clean-sheet spot can reach about 8
+  points without an attacking return.
+- A forward or advanced midfielder with real goal/assist chance can beat a
+  fourth or fifth defender even without a clean sheet.
+- A non-playing star is worth 0 and must lose to almost any legal starter.
+
+When the scoring rules differ, rebuild the same expected-value comparison from
+the actual rule text before choosing formation.
 
 # Board-Only Scoring Procedure
 
@@ -90,14 +122,31 @@ For each candidate player, estimate likely minutes:
 - Strong predicted starter: high availability.
 - Prior World Cup starter with strong minutes: high availability.
 - Prior substitute with limited minutes: medium to low availability.
-- Injured, suspended, unavailable, or absent from current squad news: remove from consideration.
+- Injured, suspended, red-card banned, yellow-card accumulation banned,
+  unavailable, or absent from current squad news: remove from consideration.
 - Unknown player with no public signal: keep only as a fallback.
+
+Availability gates:
+
+- Official starter: set `start_probability` near 1.00 and `sixty_minute_probability`
+  high unless the player is returning from injury.
+- Strong same-day predicted starter: set `start_probability` around 0.85 to 0.95.
+- Uncertain role, rotation warning, or fitness doubt: downgrade below safer legal
+  alternatives.
+- Current ruled-out, suspended, red-card ban, yellow-card accumulation ban,
+  unavailable, absent, or expected-bench signal: remove from the XI even if the
+  player is famous or has strong prior stats.
+- If the best public evidence is stale, fall back to board starts and minutes,
+  but do not ignore current negative news.
 
 Board-only approximation:
 
 - More prior starts means higher availability.
 - More prior minutes per appearance means higher availability.
 - No prior stats means uncertain, not impossible.
+
+Before formation search, create an avoid list of removed players and do not add
+them back unless newer official evidence clears the concern.
 
 ## Step 4: Score Players By Position
 
@@ -115,18 +164,25 @@ Defenders:
 - Favor likely starters on teams with clean sheet potential.
 - Prefer defenders with prior goals, assists, set-piece threat, or attacking fullback role.
 - Penalize high card risk.
+- A fourth or fifth defender needs either strong clean-sheet probability or real
+  attacking upside. Do not use extra defenders only because they are on a
+  favorite.
 
 Midfielders:
 
 - Favor advanced midfielders, penalty takers, set-piece takers, and creators.
 - Add value for prior goals, assists, starts, and minutes.
 - Defensive midfielders are acceptable only when they are reliable starters and needed for validity.
+- Prefer attacking midfielders from favored or high-total matches over low-upside
+  holding midfielders when starter certainty is similar.
 
 Forwards:
 
 - Favor confirmed or likely starting forwards on favorites.
 - Strongly favor penalty takers, central strikers, elite wide forwards, and players with prior goals or assists.
 - Avoid rotation forwards unless public evidence suggests they start.
+- If one forward is ruled out or doubtful, replace them before optimizing any
+  other marginal position.
 
 ## Step 5: Apply Correlation Logic
 
@@ -156,6 +212,8 @@ For each shape:
 - Take the required number of best DEF, MID, and FWD candidates.
 - Prefer a different shape if it admits clearly stronger attackers or avoids weak low-minute players.
 - Default to 1-4-4-2 when scores are close.
+- Compare the last player admitted by each shape. Choose the shape that avoids
+  the weakest low-upside starter, not the shape that merely looks balanced.
 
 # Formation Selection Guide
 
@@ -169,6 +227,10 @@ Let the rules and match environment drive formation:
   prefer 1-3-5-2 or 1-4-5-1.
 - If the board has weak forward options, do not force three forwards.
 - If the board has weak defenders, do not force five defenders.
+- Prefer 1-3-4-3 or 1-3-5-2 when three forwards or five midfielders are all
+  likely starters with better goal/assist expectation than the fourth defender.
+- Prefer 1-4-4-2 only when the fourth defender's clean-sheet and attacking value
+  beats the next legal midfielder or forward.
 
 # Stacking Bonuses
 
@@ -179,6 +241,11 @@ Stacking is allowed because there is no budget.
 - Use 2 to 5 players from a clearly superior team if they are likely starters.
 - Do not stack uncertain bench players.
 - Avoid exceeding 5 players from one team unless the board is thin or that team has overwhelming matchup quality.
+- Avoid using GK plus 3 defenders from one team unless official lineups and
+  matchup evidence give a strong clean-sheet case and the alternatives are
+  meaningfully weaker.
+- Do not let a defensive stack block elite attackers or set-piece midfielders
+  from another match with better expected goal involvement.
 
 # Portfolio Balance
 
@@ -198,6 +265,8 @@ Build a lineup with multiple scoring paths:
 After the board-only ranking, adjust only when evidence is strong:
 
 - Replace a non-starter with a confirmed or highly likely starter at the same position.
+- Replace any selected player with same-day ruled-out, injury, suspension,
+  red-card ban, yellow-card accumulation ban, or expected-bench evidence.
 - Upgrade to penalty takers, set-piece takers, elite creators, and central forwards from favorites.
 - Prefer a favorite goalkeeper over an underdog goalkeeper unless the underdog keeper is expected to face many shots and clean sheet odds are not decisive.
 - For defenders, favor clean sheet probability first, then attacking fullbacks or set-piece threats.
@@ -227,6 +296,12 @@ Before setting `fantasy_xi`, mentally count positions and IDs:
 - 1 to 3 FWD.
 - All IDs are from `players.json`.
 - All players are eligible for the current matchday.
+- No selected player is on the avoid list.
+- Every selected player has either official starter evidence, strong predicted
+  starter evidence, or the best available board-only minutes case.
+- The weakest selected defender was compared against the best omitted MID/FWD.
+- The weakest selected defensive midfielder was compared against the best omitted
+  attacker, creator, or set-piece taker.
 
 # Final Fantasy XI Output
 
