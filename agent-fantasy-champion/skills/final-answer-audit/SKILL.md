@@ -81,6 +81,24 @@ If the final XI contains many defenders, verify clean-sheet scoring and matchup
 quality justify it. If the Risk Play contradicts the lineup correlation, change
 the Risk Play or return `null`.
 
+# Availability And Upside Audit
+
+Before returning the JSON, do one final pass over the selected XI:
+
+- Remove any player with current ruled-out, injured, suspended, red-card ban,
+  yellow-card accumulation ban, unavailable, absent, expected-bench, or strong
+  fitness-doubt evidence.
+- Make sure every selected player is either an official starter, a strong
+  predicted starter, or the best board-only minutes option at that position.
+- Compare the lowest-upside selected DEF against the best omitted MID/FWD.
+- Compare the lowest-upside selected MID against the best omitted attacker,
+  set-piece taker, penalty taker, or primary creator.
+- If a clean-sheet stack uses GK plus 3 defenders from the same team, verify that
+  the clean-sheet case is stronger than the omitted attacking alternatives.
+- If public research was unavailable, say only in the `strategy` sentence that
+  the selection used board starts/minutes and conservative risk. Do not add any
+  explanation outside the JSON.
+
 # Risk Object Review
 
 Use `/workspace/game-board/claim-catalog.json` as the only source of truth for

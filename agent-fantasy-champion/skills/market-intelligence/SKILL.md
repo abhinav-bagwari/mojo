@@ -17,6 +17,19 @@ on the board-only optimizer in `pick-fantasy-xi`.
 Spend at most 90 seconds on public research. Do not get stuck browsing. The agent
 must still submit a valid JSON answer.
 
+Use the time in two passes:
+
+1. Spend about 45 seconds finding official lineups, same-day team news, injuries,
+   suspensions, red-card bans, yellow-card accumulation bans, and predicted
+   starters for the highest-value matches.
+2. Spend about 45 seconds checking odds or reputable previews for favorite
+   strength, clean-sheet chance, goal environment, set pieces, penalties, and
+   player roles.
+
+If official lineups are available, stop searching and use them. A confirmed
+starter beats every projection. A confirmed non-starter, unavailable player, or
+player ruled out must not be selected.
+
 # Files To Read First
 
 - `/workspace/game-board/matchday.json`
@@ -65,8 +78,8 @@ For each match in `matches.json`, build a compact mental table:
 - Likely starting defenders for stronger clean sheet teams.
 - Main attackers: forwards, advanced midfielders, penalty takers, set-piece
   takers, and players with strong recent goal involvement.
-- Confirmed injuries, suspensions, rotation warnings, or players unlikely to
-  start.
+- Confirmed injuries, suspensions, red-card bans, yellow-card accumulation bans,
+  rotation warnings, or players unlikely to start.
 - Official lineups if kickoff is close. Official lineups outrank all predictions.
 
 Research priority:
@@ -81,6 +94,27 @@ Do not spend equal time on every player. First identify the likely best teams an
 highest-total matches, then focus research on their starters and primary
 attackers.
 
+# Daily News Gate
+
+Before finalizing the XI, run this mental gate for every selected player:
+
+- `green`: official starter, or strong same-day predicted starter with no injury
+  concern.
+- `yellow`: likely involved but role, minutes, or fitness is uncertain.
+- `red`: ruled out, injured, suspended, red-card banned, yellow-card accumulation
+  banned, absent, not in squad, expected bench, or mentioned as unlikely to
+  start.
+
+Never keep a `red` player. Replace a `yellow` player when a similar legal
+`green` player exists at the same position or when the formation can legally
+shift to a stronger `green` candidate.
+
+Treat same-day words like "ruled out", "will miss", "sidelined", "injury
+setback", "not in the squad", "suspended", "red-card ban", "yellow-card
+accumulation", "bench", "rotation", and "fitness doubt" as downgrade signals.
+If those words appear in a current source, the player needs newer official
+evidence to stay in the XI.
+
 # Starter Certainty
 
 The most common way to lose Fantasy XI points is selecting players who do not
@@ -91,6 +125,8 @@ start or do not play enough minutes. Make starter certainty explicit:
 - Downgrade players returning from injury, rotation candidates, or players
   mentioned as bench options.
 - If two candidates have similar upside, choose the one with clearer minutes.
+- Do not select a famous player with an injury or bench signal just because the
+  board contains strong historical stats.
 
 # Famous Name Trap
 
@@ -98,6 +134,23 @@ Do not pick a famous player only because they are famous. They still need to be
 eligible, likely to play, and aligned with the current scoring rules. A less
 famous set-piece taker, penalty taker, attacking fullback, or nailed starter can
 beat a famous rotation player.
+
+# Public Research Output
+
+Keep a compact mental table with these columns for each match:
+
+- match id
+- favorite and underdog
+- estimated goal environment
+- estimated clean-sheet chance for each team
+- likely starting GK for each team
+- high-confidence DEF starters on clean-sheet teams
+- high-upside MID/FWD starters
+- penalties, set pieces, and primary creators
+- avoid list with the reason
+
+Use that table to improve the board-only XI. Do not put this table in the final
+answer.
 
 # Good Public Sources
 
@@ -108,7 +161,7 @@ Prefer sources that are current and specific:
 - Club/national team match previews with probable lineups.
 - Betting odds or consensus previews for favorite, clean sheet, and goal total
   signals.
-- Recent player/team news for injuries, suspension, and role changes.
+- Recent player/team news for injuries, suspension, card bans, and role changes.
 
 Use only public pages that do not require sign-in. Do not assume a page is
 current unless its date clearly applies to the matchday.

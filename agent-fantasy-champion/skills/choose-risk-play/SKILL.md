@@ -21,7 +21,11 @@ Read:
 - `/workspace/game-board/players.json`
 - `/workspace/game-board/teams.json`
 - `/workspace/game-board/standings-before.json`
+- `/workspace/current-standings/` when present
 - `/workspace/rules/risk-play.md`
+
+Also use any current team points or rank stated in the platform prompt. Risk
+appetite should follow the best available current score context.
 
 # Validity Rules
 
@@ -50,6 +54,9 @@ thresholds:
 When the current team has little or no accumulated score, the downside of Risk
 Play may be smaller, so a strong Green or Yellow claim can be worthwhile. When
 the team is already near the top, protect the lead and avoid fragile Red claims.
+When the current team has a meaningful positive score, remember that every wrong
+Risk Play subtracts real tournament points. Do not force a claim after a strong
+Fantasy XI; `null` is better than a low-confidence bet.
 
 # Tournament Position Adjustment
 
@@ -70,18 +77,26 @@ Prefer claims with stable event rates and low validation ambiguity:
 
 1. `no_goal_first_10` on a match where both teams start cautiously or where the
    underdog is likely to sit deep.
-2. `match_2plus_goals` on a favorite or high-total match.
-3. `goal_before_halftime` on a high-tempo favorite match.
-4. `match_2plus_cards` or `match_2plus_yellow_cards` on intense rivalry,
+2. `no_goal_stoppage_time` on a match without strong late-chaos indicators.
+3. `match_2plus_goals` on a favorite or high-total match.
+4. `goal_before_halftime` on a high-tempo favorite match.
+5. `match_2plus_cards` or `match_2plus_yellow_cards` on intense rivalry,
    knockout, high-foul, or underdog-defense profiles.
-5. `both_teams_score` only when both attacks are strong and both defenses are
+6. `both_teams_score` only when both attacks are strong and both defenses are
    vulnerable.
-6. `team_scores_first` only for a strong favorite with reliable early pressure.
-7. `player_scores` only for a confirmed starting penalty taker or elite striker.
+7. `team_scores_first` only for a strong favorite with reliable early pressure.
+8. `player_scores` only for a confirmed starting penalty taker or elite striker.
 
 Rank candidate claims by confidence first, then reward size. A lower-payout
 Green claim with strong evidence is usually better than a fragile Yellow or Red
 claim.
+
+Use the exact current claim catalog. If a preferred claim is missing, do not
+invent it. Move to the next valid claim or return `null`.
+
+Risk Play evidence must be current enough for the matchday. Do not choose a
+player-scoring or team-scoring claim from stale role assumptions when same-day
+lineup or injury evidence is missing.
 
 Use the Fantasy XI as supporting evidence:
 
@@ -91,6 +106,9 @@ Use the Fantasy XI as supporting evidence:
   needs the opposing team to score.
 - If a player is selected mainly for penalty or striker upside, `player_scores`
   can be considered only with very strong starter and role evidence.
+- If the XI avoids a match because it is low quality, chaotic, or uncertain,
+  prefer not to anchor the Risk Play there unless the selected claim is stable
+  and Green.
 
 Avoid unless very strong evidence:
 
@@ -110,6 +128,9 @@ teams, low goal environment, underdog defensive posture, or lack of elite early
 scorers.
 
 If even that is uncertain or the claim is unavailable, return `null`.
+
+Do not use the safe default if the lowest-risk match cannot be identified from
+board data, current previews, or odds. In that case, return `null`.
 
 # Final Risk Decision
 
