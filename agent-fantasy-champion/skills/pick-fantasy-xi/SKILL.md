@@ -54,8 +54,9 @@ Before ranking players, read `/workspace/rules/fantasy-xi.md` and adjust the wei
 
 # Expected Points Model
 
-Use the exact scoring rules in `/workspace/rules/fantasy-xi.md`. If the current
-rules match the common tournament rules, rank players with this mental model:
+Use the exact scoring rules in `/workspace/rules/fantasy-xi.md`. When that file
+uses the standard Daily Answer Contract values, rank players with this mental
+model:
 
 - start floor: `2 * start_probability`
 - 60-minute floor: `2 * sixty_minute_probability`
@@ -67,16 +68,16 @@ rules match the common tournament rules, rank players with this mental model:
 
 Do not overfit the numbers. The purpose is to compare options:
 
-- A safe starter who reaches 60 minutes is usually worth about 4 points before
-  events.
+- A safe starter who reaches 60 minutes is worth about 4 points before events.
 - A defender or goalkeeper from a strong clean-sheet spot can reach about 8
   points without an attacking return.
 - A forward or advanced midfielder with real goal/assist chance can beat a
   fourth or fifth defender even without a clean sheet.
 - A non-playing star is worth 0 and must lose to almost any legal starter.
 
-When the scoring rules differ, rebuild the same expected-value comparison from
-the actual rule text before choosing formation.
+When `/workspace/rules/fantasy-xi.md` differs from these values, rebuild the
+same expected-value comparison from the actual rule text before choosing
+formation.
 
 # Board-Only Scoring Procedure
 
@@ -260,6 +261,27 @@ Build a lineup with multiple scoring paths:
 - Avoid picking both a goalkeeper and several opposing attackers unless the
   attacker upside is clearly worth the negative correlation.
 
+# Whole-Slate Challenger Review
+
+Do not force representation from every match, but do not ignore a match without
+checking its best options.
+
+Before finalizing the XI:
+
+- Identify the best 1 or 2 fantasy candidates from each match on the slate using
+  the current scoring rules, likely minutes, and role upside.
+- If the XI has 8 or more players from only two teams, compare the weakest
+  selected players against those omitted challenger candidates.
+- If the XI uses 5 defenders, compare the weakest selected defender against the
+  best omitted MID or FWD from every match.
+- If one match has no selected players, verify that its top challenger candidates
+  are weaker than the final selected player at the same position or through a
+  legal formation change.
+- Keep the concentrated build only when the selected player clearly has better
+  expected points. If the comparison is close, prefer the challenger with safer
+  minutes, set pieces, penalties, central attacking role, or higher goal
+  environment.
+
 # Improve With Public Intelligence
 
 After the board-only ranking, adjust only when evidence is strong:
@@ -302,6 +324,8 @@ Before setting `fantasy_xi`, mentally count positions and IDs:
 - The weakest selected defender was compared against the best omitted MID/FWD.
 - The weakest selected defensive midfielder was compared against the best omitted
   attacker, creator, or set-piece taker.
+- Any match with no selected players had its top 1 or 2 candidates compared
+  against the weakest selected players before accepting the final XI.
 
 # Final Fantasy XI Output
 
