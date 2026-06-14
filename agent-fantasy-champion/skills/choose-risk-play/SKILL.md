@@ -41,6 +41,11 @@ appetite should follow the best available current score context.
 - Green risks 15 percent of current points.
 - Yellow risks 25 percent of current points.
 - Red risks 35 percent of current points.
+- The tournament may seed teams with starting points before the first scored
+  day. Use `/workspace/game-board/standings-before.json` as the source of truth
+  for current points rather than assuming day-one score is zero.
+- Stakes are rounded by the tournament; do not include `stake`, `bet_points`, or
+  `stake_percent` in the answer.
 
 Expected value is roughly stake percent multiplied by two times success
 probability minus one. Because probability estimates are noisy, use conservative
@@ -51,12 +56,11 @@ thresholds:
 - Red: choose if estimated probability is at least 0.82, or at least 0.76 only
   when standings show the team needs a large catch-up play.
 
-When the current team has little or no accumulated score, the downside of Risk
-Play may be smaller, so a strong Green or Yellow claim can be worthwhile. When
+When the current team has 0 or fewer points, the downside of Risk Play may be
+zero. Otherwise, every wrong Risk Play subtracts real tournament points. When
 the team is already near the top, protect the lead and avoid fragile Red claims.
-When the current team has a meaningful positive score, remember that every wrong
-Risk Play subtracts real tournament points. Do not force a claim after a strong
-Fantasy XI; `null` is better than a low-confidence bet.
+Do not force a claim after a strong Fantasy XI; `null` is better than a
+low-confidence bet.
 
 # Tournament Position Adjustment
 

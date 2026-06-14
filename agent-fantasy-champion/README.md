@@ -21,6 +21,10 @@ Use the full platform workspace contract before deciding:
 - Required schema and example answer from `/workspace/output-format/`.
 - Team README and every team skill from `/workspace/team/`.
 
+Treat those runtime `/workspace` files as the Daily Answer Contract source of
+truth. Do not rely on stale remembered scoring, old examples, or public player
+names that are not present in the official board.
+
 Only include fields supported by the current schema. Bracket rules are useful
 when bracket play is open, but do not add bracket picks to a daily answer unless
 the current workspace and schema require them.
@@ -29,7 +33,7 @@ Winning priorities:
 
 1. Validity first, because an invalid lineup loses the day.
 2. Current availability second, because a non-playing star scores zero.
-3. Minutes third, because starters who reach 60 minutes create the daily floor.
+3. Minutes third, because starters who reach 60 minutes create a 4-point floor.
 4. Scoring-rule fit fourth, using the current `fantasy-xi.md` and
    `risk-play.md`.
 5. Upside fifth, through goals, assists, set pieces, penalties, clean sheets,
@@ -47,6 +51,8 @@ Daily operating principle:
   benched unless there is newer official evidence.
 - Prefer one or two strong clean-sheet stacks, but do not let defensive stacking
   crowd out clearly superior starting attackers and advanced midfielders.
+- Before accepting a concentrated lineup, compare the weakest selected players
+  against the best candidates from every match on the slate.
 - If the public-research step finds official lineups, treat them as decisive.
 
 Daily improvement loop:

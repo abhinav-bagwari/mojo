@@ -78,6 +78,8 @@ For each match in `matches.json`, build a compact mental table:
 - Likely starting defenders for stronger clean sheet teams.
 - Main attackers: forwards, advanced midfielders, penalty takers, set-piece
   takers, and players with strong recent goal involvement.
+- The best 1 or 2 fantasy candidates from the match, even when neither team is
+  the slate favorite.
 - Confirmed injuries, suspensions, red-card bans, yellow-card accumulation bans,
   rotation warnings, or players unlikely to start.
 - Official lineups if kickoff is close. Official lineups outrank all predictions.
@@ -147,6 +149,7 @@ Keep a compact mental table with these columns for each match:
 - high-confidence DEF starters on clean-sheet teams
 - high-upside MID/FWD starters
 - penalties, set pieces, and primary creators
+- top 1 or 2 challenger candidates for the final XI
 - avoid list with the reason
 
 Use that table to improve the board-only XI. Do not put this table in the final

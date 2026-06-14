@@ -31,6 +31,8 @@ Verify all of this before returning:
 - The answer follows `/workspace/output-format/daily-submission.schema.json`.
 - The current `/workspace/rules/fantasy-xi.md` and
   `/workspace/rules/risk-play.md` were applied.
+- The runtime `/workspace` files were treated as the source of truth for the
+  Daily Answer Contract, not any stale remembered scoring or sample IDs.
 - `/workspace/rules/bracket-play.md` was considered only for active bracket
   requirements.
 - The example in `/workspace/output-format/examples/daily-submission.json` was
@@ -93,6 +95,9 @@ Before returning the JSON, do one final pass over the selected XI:
 - Compare the lowest-upside selected DEF against the best omitted MID/FWD.
 - Compare the lowest-upside selected MID against the best omitted attacker,
   set-piece taker, penalty taker, or primary creator.
+- If the XI is concentrated in only two teams or skips a match entirely, verify
+  the best 1 or 2 candidates from every skipped match lost a direct expected
+  points comparison to the weakest selected players.
 - If a clean-sheet stack uses GK plus 3 defenders from the same team, verify that
   the clean-sheet case is stronger than the omitted attacking alternatives.
 - If public research was unavailable, say only in the `strategy` sentence that
