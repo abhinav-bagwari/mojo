@@ -119,6 +119,10 @@ Risk Play results, and estimated stake justify the downside. If the team is near
 the top or the Green stake is large, `risk_play: null` is preferred unless the
 claim is close to obvious.
 
+If standings show the team is far behind the lead, verify the Risk Play posture
+matches catch-up mode: prefer a strong positive-value Green or very strong
+Yellow claim over passive `null`, but still reject weak or contradictory claims.
+
 Examples of valid shapes described in prose:
 
 - A match-level Green claim needs `claim_id` and `match_id`.

@@ -91,8 +91,32 @@ Use `/workspace/game-board/standings-before.json` if it contains the current
 - If middle of the table, prefer the highest EV Green or a very strong Yellow.
 - If far behind late in the tournament, consider Yellow or Red only when evidence
   is strong and the claim has real upside.
+- If the gap to first place is about 60 points or more, or one normal strong day
+  cannot close the gap, enter catch-up mode: do not default to `null` merely
+  because yesterday's Risk Play missed. Search for the best positive-value Green
+  or very strong Yellow claim, while still rejecting low-confidence claims.
 
 If the current team is not found in standings, use the middle-table policy.
+
+# Catch-Up Mode
+
+Catch-up mode means calculated upside, not gambling for its own sake.
+
+Use catch-up mode when standings, prompt notes, or scorecards show the team is
+well outside the top group or roughly 60 or more points behind the lead.
+
+In catch-up mode:
+
+- A strong Green claim with multiple signals is preferred over `null`.
+- A Yellow claim can be selected when it has strong evidence and a realistic
+  chance to close meaningful ground.
+- Red claims remain rare. Use Red only when the gap is very large, the evidence
+  is exceptional, and safer claims cannot materially help.
+- Avoid exact scores, comeback wins, red cards, extra time, and penalties unless
+  the board context makes them unusually strong.
+- Do not choose a Risk Play that contradicts the Fantasy XI's main stack.
+- If every available claim is weak or ambiguous, return `null`; losing another
+  large stake is worse than waiting for a better edge.
 
 # Claim Selection Heuristics
 
@@ -159,13 +183,15 @@ board data, current previews, or odds. In that case, return `null`.
 
 Choose in this order:
 
-1. `null` when the team is protecting a strong standing and no Green claim is
+1. Catch-up mode: highest-confidence positive-value Green or very strong Yellow
+   claim that can close meaningful ground.
+2. `null` when the team is protecting a strong standing and no Green claim is
    near-obvious.
-2. Highest-confidence positive-value Green claim.
-3. Very strong Yellow claim when probability and standings justify it.
-4. Red claim only when the team needs a large catch-up play and the evidence is
+3. Highest-confidence positive-value Green claim.
+4. Very strong Yellow claim when probability and standings justify it.
+5. Red claim only when the team needs a large catch-up play and the evidence is
    exceptional.
-5. `null` when no claim clears the threshold.
+6. `null` when no claim clears the threshold.
 
 After a losing Risk Play in a prior scorecard, become much more conservative
 unless the current standings require catch-up. After repeated correct Green
