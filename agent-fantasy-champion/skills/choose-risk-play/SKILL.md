@@ -51,9 +51,13 @@ appetite should follow the best available current score context.
 - Stakes are rounded by the tournament; do not include `stake`, `bet_points`, or
   `stake_percent` in the answer.
 
-Expected value is roughly stake percent multiplied by two times success
-probability minus one. Because probability estimates are noisy, use conservative
-thresholds:
+Expected points are approximately:
+
+`stake_points * (2 * success_probability - 1)`
+
+For example, a 40-point stake needs a probability above 50 percent to be
+positive expected value, but noisy estimates require a much higher confidence
+margin. Use conservative thresholds:
 
 - Green: choose if estimated probability is at least 0.62.
 - Yellow: choose if estimated probability is at least 0.70.
@@ -170,11 +174,12 @@ Avoid unless very strong evidence:
 # Safe Default
 
 If no claim is clearly strong but Green claims exist, prefer `no_goal_first_10`
-on the lowest early-goal-risk match. Choose that match by looking for cautious
-teams, low goal environment, underdog defensive posture, or lack of elite early
-scorers.
+on the lowest early-goal-risk match only if it clears the Green probability
+threshold. Choose that match by looking for cautious teams, low goal
+environment, underdog defensive posture, or lack of elite early scorers.
 
-If even that is uncertain or the claim is unavailable, return `null`.
+If even that is uncertain, below threshold, or the claim is unavailable, return
+`null`.
 
 Do not use the safe default if the lowest-risk match cannot be identified from
 board data, current previews, or odds. In that case, return `null`.

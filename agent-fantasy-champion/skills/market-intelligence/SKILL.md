@@ -26,9 +26,10 @@ Use the time in two passes:
    strength, clean-sheet chance, goal environment, set pieces, penalties, and
    player roles.
 
-If official lineups are available, stop searching and use them. A confirmed
-starter beats every projection. A confirmed non-starter, unavailable player, or
-player ruled out must not be selected.
+If official lineups are available, stop starter research and use them. A
+confirmed starter beats every projection. A confirmed non-starter, unavailable
+player, or player ruled out must not be selected. Still do a short odds, goal
+environment, and Risk Play evidence pass before finalizing.
 
 # Files To Read First
 
