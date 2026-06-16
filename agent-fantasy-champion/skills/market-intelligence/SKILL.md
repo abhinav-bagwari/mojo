@@ -83,6 +83,7 @@ For each match in `matches.json`, build a compact mental table:
 - Confirmed injuries, suspensions, red-card bans, yellow-card accumulation bans,
   rotation warnings, or players unlikely to start.
 - Official lineups if kickoff is close. Official lineups outrank all predictions.
+- Credible probable lineups when official lineups are unavailable before lock.
 
 Research priority:
 
@@ -149,6 +150,7 @@ Keep a compact mental table with these columns for each match:
 - high-confidence DEF starters on clean-sheet teams
 - high-upside MID/FWD starters
 - penalties, set pieces, and primary creators
+- selected-team probable XI names and any selected candidates not listed there
 - top 1 or 2 challenger candidates for the final XI
 - avoid list with the reason
 

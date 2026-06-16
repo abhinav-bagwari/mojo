@@ -92,6 +92,9 @@ Before returning the JSON, do one final pass over the selected XI:
   fitness-doubt evidence.
 - Make sure every selected player is either an official starter, a strong
   predicted starter, or the best board-only minutes option at that position.
+- If official lineups are unavailable and a credible probable XI exists, any
+  selected teammate missing from that probable XI must have clear replacement
+  evidence or a stronger expected-points case than predicted starters elsewhere.
 - Compare the lowest-upside selected DEF against the best omitted MID/FWD.
 - Compare the lowest-upside selected MID against the best omitted attacker,
   set-piece taker, penalty taker, or primary creator.
@@ -108,6 +111,11 @@ Before returning the JSON, do one final pass over the selected XI:
 
 Use `/workspace/game-board/claim-catalog.json` as the only source of truth for
 required risk fields.
+
+Before returning a non-null Risk Play, verify that current points, rank, recent
+Risk Play results, and estimated stake justify the downside. If the team is near
+the top or the Green stake is large, `risk_play: null` is preferred unless the
+claim is close to obvious.
 
 Examples of valid shapes described in prose:
 

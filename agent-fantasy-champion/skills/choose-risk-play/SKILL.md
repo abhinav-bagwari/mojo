@@ -12,6 +12,10 @@ risk just to look active.
 The best Risk Play is not always the most exciting one. It is the claim with the
 best mix of probability, payout, standings need, and validity confidence.
 
+Recent scorecards matter. If a previous Risk Play missed and cost a large stake,
+be materially more conservative on the next scored day unless standings show the
+team is far behind and needs catch-up variance.
+
 # Required Inputs
 
 Read:
@@ -56,6 +60,21 @@ thresholds:
 - Red: choose if estimated probability is at least 0.82, or at least 0.76 only
   when standings show the team needs a large catch-up play.
 
+Use higher thresholds when the stake is large or the team is already in a strong
+position:
+
+- If current points make a Green stake 25 points or more, choose Green only when
+  estimated probability is at least 0.72 and supported by multiple independent
+  signals such as odds, previews, team style, and lineup context.
+- If the team is top 10, top 20 percent, or within one good day of the lead,
+  prefer `null` unless a Green claim is close to obvious, at least 0.75
+  probability, and low ambiguity.
+- If the previous scored day had a missed Risk Play of 25 points or more, return
+  `null` by default for the next day unless the team is far behind and the claim
+  clears the high-stake threshold.
+- Do not choose Yellow or Red while protecting a top-table position. Use them
+  only for clear catch-up mode with exceptional evidence.
+
 When the current team has 0 or fewer points, the downside of Risk Play may be
 zero. Otherwise, every wrong Risk Play subtracts real tournament points. When
 the team is already near the top, protect the lead and avoid fragile Red claims.
@@ -67,8 +86,8 @@ low-confidence bet.
 Use `/workspace/game-board/standings-before.json` if it contains the current
 `team_id`.
 
-- If rank is top 20 percent or tournament total is near the lead, prefer Green or
-  `null`.
+- If rank is top 20 percent or tournament total is near the lead, prefer `null`
+  unless a Green claim clears the high-stake/top-table threshold.
 - If middle of the table, prefer the highest EV Green or a very strong Yellow.
 - If far behind late in the tournament, consider Yellow or Red only when evidence
   is strong and the claim has real upside.
@@ -140,15 +159,18 @@ board data, current previews, or odds. In that case, return `null`.
 
 Choose in this order:
 
-1. Highest-confidence positive-value Green claim.
-2. Very strong Yellow claim when probability and standings justify it.
-3. Red claim only when the team needs a large catch-up play and the evidence is
+1. `null` when the team is protecting a strong standing and no Green claim is
+   near-obvious.
+2. Highest-confidence positive-value Green claim.
+3. Very strong Yellow claim when probability and standings justify it.
+4. Red claim only when the team needs a large catch-up play and the evidence is
    exceptional.
-4. `null` when no claim clears the threshold.
+5. `null` when no claim clears the threshold.
 
-After a losing Risk Play in a prior scorecard, become more conservative unless
-the current standings require catch-up. After repeated correct Green claims,
-continue using Green as the default risk tier rather than jumping to Red.
+After a losing Risk Play in a prior scorecard, become much more conservative
+unless the current standings require catch-up. After repeated correct Green
+claims, continue using Green as the default risk tier rather than jumping to
+Yellow or Red.
 
 # Required Field Guide
 
