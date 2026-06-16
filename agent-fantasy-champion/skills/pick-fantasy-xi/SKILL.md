@@ -200,6 +200,10 @@ Forwards:
 
 - Favor confirmed or likely starting forwards on favorites.
 - Strongly favor penalty takers, central strikers, elite wide forwards, and players with prior goals or assists.
+- Treat elite central forwards, penalty takers, and team talismans from favored
+  or high-total matches as slate-breaker candidates. If they are eligible and
+  likely starting, they must beat ordinary low-upside midfielders and extra
+  defenders unless there is strong contrary evidence.
 - Avoid rotation forwards unless public evidence suggests they start.
 - If one forward is ruled out or doubtful, replace them before optimizing any
   other marginal position.
@@ -289,10 +293,16 @@ Before finalizing the XI:
 
 - Identify the best 1 or 2 fantasy candidates from each match on the slate using
   the current scoring rules, likely minutes, and role upside.
+- Identify all slate-breaker candidates: likely starting elite forwards,
+  penalty takers, and talisman attackers from favorites or high-total matches.
 - If the XI has 8 or more players from only two teams, compare the weakest
   selected players against those omitted challenger candidates.
 - If the XI uses 5 defenders, compare the weakest selected defender against the
   best omitted MID or FWD from every match.
+- If a slate-breaker candidate is omitted, compare that player directly against
+  the weakest selected DEF, the weakest selected MID, and the weakest selected
+  FWD. Omit the slate-breaker only when the selected players clearly have better
+  expected points or the slate-breaker has a real availability concern.
 - If one match has no selected players, verify that its top challenger candidates
   are weaker than the final selected player at the same position or through a
   legal formation change.
@@ -342,6 +352,8 @@ Before setting `fantasy_xi`, mentally count positions and IDs:
   starter evidence, or the best available board-only minutes case.
 - Any selected player missing from a credible probable XI had clear replacement
   evidence or beat a direct comparison against predicted starters elsewhere.
+- Every omitted slate-breaker attacker was explicitly compared against the
+  weakest selected players before accepting the final XI.
 - The weakest selected defender was compared against the best omitted MID/FWD.
 - The weakest selected defensive midfielder was compared against the best omitted
   attacker, creator, or set-piece taker.

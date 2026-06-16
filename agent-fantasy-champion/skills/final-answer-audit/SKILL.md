@@ -101,6 +101,8 @@ Before returning the JSON, do one final pass over the selected XI:
 - If the XI is concentrated in only two teams or skips a match entirely, verify
   the best 1 or 2 candidates from every skipped match lost a direct expected
   points comparison to the weakest selected players.
+- Verify no eligible likely-starting slate-breaker attacker was omitted without
+  beating a direct comparison against the weakest selected DEF, MID, and FWD.
 - If a clean-sheet stack uses GK plus 3 defenders from the same team, verify that
   the clean-sheet case is stronger than the omitted attacking alternatives.
 - If public research was unavailable, say only in the `strategy` sentence that
