@@ -38,7 +38,8 @@ Winning priorities:
    `risk-play.md`.
 5. Upside fifth, through goals, assists, set pieces, penalties, clean sheets,
    saves, and attacking roles.
-6. Risk Play last, based on expected value and leaderboard situation.
+6. Risk Play last, based on expected value and leaderboard situation: protect a
+   lead, but take calculated positive-value risk when chasing a large gap.
 
 Daily operating principle:
 
@@ -53,6 +54,8 @@ Daily operating principle:
   crowd out clearly superior starting attackers and advanced midfielders.
 - Before accepting a concentrated lineup, compare the weakest selected players
   against the best candidates from every match on the slate.
+- When standings show Mojo is far behind the lead, prioritize slate-breaking
+  attackers and high-confidence upside over low-variance safety picks.
 - If the public-research step finds official lineups, treat them as decisive.
 
 Daily improvement loop:

@@ -134,6 +134,9 @@ Availability gates:
 - Strong same-day predicted starter: set `start_probability` around 0.85 to 0.95.
 - Uncertain role, rotation warning, or fitness doubt: downgrade below safer legal
   alternatives.
+- Not named in a credible probable XI for that team while teammates at the same
+  position are named: downgrade below predicted starters unless there is clear
+  newer evidence the player is expected to start.
 - Current ruled-out, suspended, red-card ban, yellow-card accumulation ban,
   unavailable, absent, or expected-bench signal: remove from the XI even if the
   player is famous or has strong prior stats.
@@ -148,6 +151,22 @@ Board-only approximation:
 
 Before formation search, create an avoid list of removed players and do not add
 them back unless newer official evidence clears the concern.
+
+## Probable-Lineup Discipline
+
+Before lock, official lineups may be unavailable. In that case, credible
+probable lineups are the strongest minutes evidence.
+
+- For each team being stacked, compare selected players against the most current
+  probable XI found in market research.
+- Prefer named probable starters over teammates who are merely famous, attacking,
+  or from the stronger team.
+- Do not select multiple players from the same team who are absent from the
+  probable XI unless the preview explicitly explains they are expected injury or
+  rotation replacements.
+- If a favorite stack includes a player with no probable-start evidence, compare
+  that player against the best predicted starter from every other match before
+  keeping them.
 
 ## Step 4: Score Players By Position
 
@@ -181,6 +200,10 @@ Forwards:
 
 - Favor confirmed or likely starting forwards on favorites.
 - Strongly favor penalty takers, central strikers, elite wide forwards, and players with prior goals or assists.
+- Treat elite central forwards, penalty takers, and team talismans from favored
+  or high-total matches as slate-breaker candidates. If they are eligible and
+  likely starting, they must beat ordinary low-upside midfielders and extra
+  defenders unless there is strong contrary evidence.
 - Avoid rotation forwards unless public evidence suggests they start.
 - If one forward is ruled out or doubtful, replace them before optimizing any
   other marginal position.
@@ -270,10 +293,16 @@ Before finalizing the XI:
 
 - Identify the best 1 or 2 fantasy candidates from each match on the slate using
   the current scoring rules, likely minutes, and role upside.
+- Identify all slate-breaker candidates: likely starting elite forwards,
+  penalty takers, and talisman attackers from favorites or high-total matches.
 - If the XI has 8 or more players from only two teams, compare the weakest
   selected players against those omitted challenger candidates.
 - If the XI uses 5 defenders, compare the weakest selected defender against the
   best omitted MID or FWD from every match.
+- If a slate-breaker candidate is omitted, compare that player directly against
+  the weakest selected DEF, the weakest selected MID, and the weakest selected
+  FWD. Omit the slate-breaker only when the selected players clearly have better
+  expected points or the slate-breaker has a real availability concern.
 - If one match has no selected players, verify that its top challenger candidates
   are weaker than the final selected player at the same position or through a
   legal formation change.
@@ -321,6 +350,10 @@ Before setting `fantasy_xi`, mentally count positions and IDs:
 - No selected player is on the avoid list.
 - Every selected player has either official starter evidence, strong predicted
   starter evidence, or the best available board-only minutes case.
+- Any selected player missing from a credible probable XI had clear replacement
+  evidence or beat a direct comparison against predicted starters elsewhere.
+- Every omitted slate-breaker attacker was explicitly compared against the
+  weakest selected players before accepting the final XI.
 - The weakest selected defender was compared against the best omitted MID/FWD.
 - The weakest selected defensive midfielder was compared against the best omitted
   attacker, creator, or set-piece taker.

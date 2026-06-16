@@ -92,12 +92,17 @@ Before returning the JSON, do one final pass over the selected XI:
   fitness-doubt evidence.
 - Make sure every selected player is either an official starter, a strong
   predicted starter, or the best board-only minutes option at that position.
+- If official lineups are unavailable and a credible probable XI exists, any
+  selected teammate missing from that probable XI must have clear replacement
+  evidence or a stronger expected-points case than predicted starters elsewhere.
 - Compare the lowest-upside selected DEF against the best omitted MID/FWD.
 - Compare the lowest-upside selected MID against the best omitted attacker,
   set-piece taker, penalty taker, or primary creator.
 - If the XI is concentrated in only two teams or skips a match entirely, verify
   the best 1 or 2 candidates from every skipped match lost a direct expected
   points comparison to the weakest selected players.
+- Verify no eligible likely-starting slate-breaker attacker was omitted without
+  beating a direct comparison against the weakest selected DEF, MID, and FWD.
 - If a clean-sheet stack uses GK plus 3 defenders from the same team, verify that
   the clean-sheet case is stronger than the omitted attacking alternatives.
 - If public research was unavailable, say only in the `strategy` sentence that
@@ -108,6 +113,15 @@ Before returning the JSON, do one final pass over the selected XI:
 
 Use `/workspace/game-board/claim-catalog.json` as the only source of truth for
 required risk fields.
+
+Before returning a non-null Risk Play, verify that current points, rank, recent
+Risk Play results, and estimated stake justify the downside. If the team is near
+the top or the Green stake is large, `risk_play: null` is preferred unless the
+claim is close to obvious.
+
+If standings show the team is far behind the lead, verify the Risk Play posture
+matches catch-up mode: prefer a strong positive-value Green or very strong
+Yellow claim over passive `null`, but still reject weak or contradictory claims.
 
 Examples of valid shapes described in prose:
 
