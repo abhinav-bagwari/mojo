@@ -27,9 +27,10 @@ Use the time in two passes:
    player roles.
 
 If official lineups are available, stop starter research and use them. A
-confirmed starter beats every projection. A confirmed non-starter, unavailable
-player, or player ruled out must not be selected. Still do a short odds, goal
-environment, and Risk Play evidence pass before finalizing.
+confirmed starter beats every projection. A confirmed substitute, confirmed
+non-starter, unavailable player, or player ruled out must not be selected while
+a legal starter alternative exists. Still do a short odds, goal environment, and
+Risk Play evidence pass before finalizing.
 
 # Files To Read First
 
@@ -81,9 +82,9 @@ For each match in `matches.json`, build a compact mental table:
   takers, and players with strong recent goal involvement.
 - The best 1 or 2 fantasy candidates from the match, even when neither team is
   the slate favorite.
-- Any slate-breaking attacker: elite central forward, penalty taker, or team
-  talisman from a favored or high-total match who could outscore safe
-  midfielders and defenders.
+- Any slate-breaking attacker: elite central forward, penalty taker, set-piece
+  creator, or team talisman from any match who could outscore safe midfielders
+  and defenders.
 - Confirmed injuries, suspensions, red-card bans, yellow-card accumulation bans,
   rotation warnings, or players unlikely to start.
 - Official lineups if kickoff is close. Official lineups outrank all predictions.
@@ -97,9 +98,10 @@ Research priority:
 4. Betting or consensus market view for favorite, clean sheet, and goal total.
 5. Recent form, role, set pieces, penalties, and goal involvement.
 
-Do not spend equal time on every player. First identify the likely best teams and
-highest-total matches, then focus research on their starters and primary
-attackers.
+Do not spend equal time on every player. First identify each match's best
+likely-starting attacker or creator, then identify the likely best teams and
+highest-total matches. Do not let a favorite-team stack hide an elite goal
+threat from another match.
 
 # Daily News Gate
 
@@ -109,8 +111,8 @@ Before finalizing the XI, run this mental gate for every selected player:
   concern.
 - `yellow`: likely involved but role, minutes, or fitness is uncertain.
 - `red`: ruled out, injured, suspended, red-card banned, yellow-card accumulation
-  banned, absent, not in squad, expected bench, or mentioned as unlikely to
-  start.
+  banned, absent, not in squad, listed only as a substitute on an official team
+  sheet, expected bench, or mentioned as unlikely to start.
 
 Never keep a `red` player. Replace a `yellow` player when a similar legal
 `green` player exists at the same position or when the formation can legally
