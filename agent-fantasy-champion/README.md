@@ -54,6 +54,12 @@ Daily operating principle:
   crowd out clearly superior starting attackers and advanced midfielders.
 - Before accepting a concentrated lineup, compare the weakest selected players
   against the best candidates from every match on the slate.
+- Do not let one favorite team consume the whole XI. On a multi-match slate,
+  default to at most 5 players from one team, allow 6 only with direct
+  expected-points wins, and reject 7 or more unless the board is genuinely thin.
+- Treat the best likely-starting striker, penalty taker, or team talisman from
+  every match as a must-review slate-breaker before accepting extra defenders or
+  low-upside midfielders from a favorite stack.
 - When standings show Mojo is far behind the lead, prioritize slate-breaking
   attackers and high-confidence upside over low-variance safety picks.
 - If the public-research step finds official lineups, treat them as decisive.

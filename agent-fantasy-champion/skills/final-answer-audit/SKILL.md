@@ -82,14 +82,16 @@ If the final XI contains mostly famous names, verify they are likely starters.
 If the final XI contains many defenders, verify clean-sheet scoring and matchup
 quality justify it. If the Risk Play contradicts the lineup correlation, change
 the Risk Play or return `null`.
+If the final XI is dominated by one favorite team, verify it is not a lazy
+favorite-stack bias before accepting it.
 
 # Availability And Upside Audit
 
 Before returning the JSON, do one final pass over the selected XI:
 
 - Remove any player with current ruled-out, injured, suspended, red-card ban,
-  yellow-card accumulation ban, unavailable, absent, expected-bench, or strong
-  fitness-doubt evidence.
+  yellow-card accumulation ban, unavailable, absent, official-substitute-only,
+  expected-bench, or strong fitness-doubt evidence.
 - Make sure every selected player is either an official starter, a strong
   predicted starter, or the best board-only minutes option at that position.
 - If official lineups are unavailable and a credible probable XI exists, any
@@ -101,6 +103,13 @@ Before returning the JSON, do one final pass over the selected XI:
 - If the XI is concentrated in only two teams or skips a match entirely, verify
   the best 1 or 2 candidates from every skipped match lost a direct expected
   points comparison to the weakest selected players.
+- If one team has 6 selected players, verify the 6th player clearly beats every
+  omitted match's best likely-starting attacker, creator, set-piece taker, or
+  penalty taker.
+- If one team has 7 or more selected players on a multi-match slate, rebuild the
+  XI unless the board is genuinely thin and lacks legal likely starters
+  elsewhere.
+- Never return an all-one-team XI on a multi-match slate.
 - Verify no eligible likely-starting slate-breaker attacker was omitted without
   beating a direct comparison against the weakest selected DEF, MID, and FWD.
 - If a clean-sheet stack uses GK plus 3 defenders from the same team, verify that

@@ -29,7 +29,7 @@ Priority order:
 1. Validity and likely minutes.
 2. Exact scoring-rule fit from `/workspace/rules/fantasy-xi.md`.
 3. Official or strongly predicted starters.
-4. High-upside attackers from favorites.
+4. High-upside attackers, penalty takers, and slate-breakers from every match.
 5. Goalkeepers and defenders with clean sheet potential.
 6. Midfielders with set pieces, penalties, advanced role, or prior goals/assists.
 7. Prior World Cup or board stats when public data is missing.
@@ -198,12 +198,17 @@ Midfielders:
 
 Forwards:
 
-- Favor confirmed or likely starting forwards on favorites.
+- Favor confirmed or likely starting forwards with the best goal probability,
+  using team strength as one signal rather than the whole decision.
 - Strongly favor penalty takers, central strikers, elite wide forwards, and players with prior goals or assists.
 - Treat elite central forwards, penalty takers, and team talismans from favored
   or high-total matches as slate-breaker candidates. If they are eligible and
   likely starting, they must beat ordinary low-upside midfielders and extra
   defenders unless there is strong contrary evidence.
+- Also treat the best likely-starting goal threat from every match as a
+  slate-breaker review candidate, even when that player's team is not the
+  strongest favorite. Do not omit that player merely to add a fifth or sixth
+  teammate from a favorite stack.
 - Avoid rotation forwards unless public evidence suggests they start.
 - If one forward is ruled out or doubtful, replace them before optimizing any
   other marginal position.
@@ -263,8 +268,15 @@ Stacking is allowed because there is no budget.
 - Add value for GK plus 1 or 2 defenders from a favorite with clean sheet chance.
 - Add value for 2 to 4 attackers from the strongest high-goal team.
 - Use 2 to 5 players from a clearly superior team if they are likely starters.
+- Default maximum from one team is 5 players.
+- A 6th player from one team is allowed only when that player directly beats the
+  best omitted attacker, creator, set-piece taker, or penalty taker from every
+  other match on expected points.
+- Reject 7 or more players from one team on a multi-match slate unless the board
+  is genuinely thin and there are not enough likely starters or legal
+  slate-breakers elsewhere.
+- Never return an all-one-team XI on a multi-match slate.
 - Do not stack uncertain bench players.
-- Avoid exceeding 5 players from one team unless the board is thin or that team has overwhelming matchup quality.
 - Avoid using GK plus 3 defenders from one team unless official lineups and
   matchup evidence give a strong clean-sheet case and the alternatives are
   meaningfully weaker.
@@ -279,6 +291,9 @@ Build a lineup with multiple scoring paths:
   match slate offers a clear favorite.
 - At least four players with real goal or assist upside when the board allows it.
 - At least one set-piece, penalty, or primary-creator profile when available.
+- On a four-match slate, the XI should normally include players from at least
+  three matches. Fewer is allowed only when every omitted match's best
+  likely-starting attacker or creator lost a direct expected-points comparison.
 - Avoid filling the XI with low-upside defensive midfielders unless they are
   needed for validity and minutes safety.
 - Avoid picking both a goalkeeper and several opposing attackers unless the
@@ -293,10 +308,17 @@ Before finalizing the XI:
 
 - Identify the best 1 or 2 fantasy candidates from each match on the slate using
   the current scoring rules, likely minutes, and role upside.
+- For each match, separately identify the best likely-starting striker, penalty
+  taker, set-piece taker, and team talisman when present in the board.
 - Identify all slate-breaker candidates: likely starting elite forwards,
   penalty takers, and talisman attackers from favorites or high-total matches.
 - If the XI has 8 or more players from only two teams, compare the weakest
   selected players against those omitted challenger candidates.
+- If the XI has 6 players from one team, compare the 6th player against every
+  omitted match's best attacker or creator. Keep the 6th player only on a clear
+  expected-points win.
+- If the XI has 7 or more players from one team, rebuild the formation because
+  the lineup is probably over-stacked.
 - If the XI uses 5 defenders, compare the weakest selected defender against the
   best omitted MID or FWD from every match.
 - If a slate-breaker candidate is omitted, compare that player directly against
@@ -318,7 +340,9 @@ After the board-only ranking, adjust only when evidence is strong:
 - Replace a non-starter with a confirmed or highly likely starter at the same position.
 - Replace any selected player with same-day ruled-out, injury, suspension,
   red-card ban, yellow-card accumulation ban, or expected-bench evidence.
-- Upgrade to penalty takers, set-piece takers, elite creators, and central forwards from favorites.
+- Upgrade to penalty takers, set-piece takers, elite creators, and central
+  forwards from any match, especially when they are likely starters with strong
+  goal or assist probability.
 - Prefer a favorite goalkeeper over an underdog goalkeeper unless the underdog keeper is expected to face many shots and clean sheet odds are not decisive.
 - For defenders, favor clean sheet probability first, then attacking fullbacks or set-piece threats.
 - For midfielders, favor advanced role, set pieces, penalties, recent goal involvement, and reliable minutes.
@@ -331,9 +355,10 @@ When two players are close:
 1. Prefer official starter.
 2. Prefer better team strength.
 3. Prefer higher goal or assist upside.
-4. Prefer safer minutes.
-5. Prefer lower card risk.
-6. Prefer the player whose match has a higher goal environment.
+4. Prefer penalty, set-piece, central-forward, or primary-creator role.
+5. Prefer safer minutes.
+6. Prefer lower card risk.
+7. Prefer the player whose match has a higher goal environment.
 
 # Final Self-Check
 
@@ -348,6 +373,9 @@ Before setting `fantasy_xi`, mentally count positions and IDs:
 - All IDs are from `players.json`.
 - All players are eligible for the current matchday.
 - No selected player is on the avoid list.
+- No multi-match slate lineup has 7 or more players from one team.
+- Any 6-player team stack had the 6th player beat every omitted match's best
+  attacker or creator in a direct comparison.
 - Every selected player has either official starter evidence, strong predicted
   starter evidence, or the best available board-only minutes case.
 - Any selected player missing from a credible probable XI had clear replacement
