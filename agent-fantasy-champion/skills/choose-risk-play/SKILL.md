@@ -40,6 +40,21 @@ appetite should follow the best available current score context.
 - Do not include `stake`, `bet_points`, or `stake_percent`.
 - Include required fields only unless the schema clearly allows more.
 
+# Knockout Scoring Rules
+
+Knockout matches add important claim semantics:
+
+- Extra time counts for knockout final-score and player-event Risk Play claims
+  when the claim wording covers the full knockout match.
+- Penalty shootout goals do not count as normal goals for standard Risk Play
+  goal claims unless the claim explicitly says it is about the shootout.
+- `match_goes_to_extra_time` and `match_goes_to_penalties` are knockout-only
+  Risk Plays. Use them only when they exist in `claim-catalog.json`.
+- These knockout Risk Plays are part of the normal daily Fantasy XI + Risk Play
+  flow, not the separate Bracket Play flow.
+- Bracket Play opens later with the Round of 32 bracket and produces bracket
+  JSON only.
+
 # Risk Stakes
 
 - Green risks 15 percent of current points.
@@ -170,6 +185,12 @@ Avoid unless very strong evidence:
 - `red_card_shown`
 - `match_goes_to_extra_time`
 - `match_goes_to_penalties`
+
+For `match_goes_to_extra_time`, look for an evenly matched knockout tie,
+conservative styles, strong defenses, low goal environment, and no clear
+favorite. For `match_goes_to_penalties`, require an even tighter match profile:
+low-scoring expectation, resilient goalkeepers, penalty competence, and neither
+team having a reliable late-match edge.
 
 # Safe Default
 

@@ -1,16 +1,17 @@
 ---
 name: market-intelligence
-description: Gather fast public match and player context before optimizing the Fantasy XI and Risk Play.
+description: Gather fast public match, player, and bracket context before optimizing Fantasy XI, Risk Play, or Bracket Play.
 ---
 
 # Mission
 
 Use the runtime board as the source of truth for IDs and eligibility. Use public
 internet only as a decision-quality layer: likely starters, injuries,
-suspensions, tactical roles, team strength, odds, and goal environment.
+suspensions, tactical roles, team strength, odds, goal environment, and knockout
+path strength.
 
 If network access is disabled or research is slow, skip public research and rely
-on the board-only optimizer in `pick-fantasy-xi`.
+on the board-only optimizer in `pick-fantasy-xi` or `pick-bracket`.
 
 # Time Budget
 
@@ -35,6 +36,7 @@ Risk Play evidence pass before finalizing.
 # Files To Read First
 
 - `/workspace/game-board/matchday.json`
+- `/workspace/game-board/bracket.json`
 - `/workspace/game-board/matches.json`
 - `/workspace/game-board/players.json`
 - `/workspace/game-board/teams.json`
@@ -45,6 +47,10 @@ Risk Play evidence pass before finalizing.
 - `/workspace/rules/bracket-play.md`
 - `/workspace/output-format/daily-submission.schema.json`
 - `/workspace/output-format/examples/daily-submission.json`
+- `/workspace/output-format/bracket-submission.schema.json` when Bracket Play
+  is active
+- `/workspace/output-format/examples/bracket-submission.json` when Bracket Play
+  is active
 - `/workspace/team/README.md` when present
 - every `/workspace/team/**/SKILL.md`
 
@@ -59,16 +65,26 @@ Use every provided file for its intended role:
 - `players.json` is the only valid source for Fantasy XI player IDs.
 - `teams.json` provides team IDs, names, roster metadata, and team context.
 - `standings-before.json` informs risk appetite based on tournament position.
+- `world-cup-standings.json`, when present, informs bracket qualification,
+  seeding, form, and likely knockout paths.
+- `bracket-context.json`, when present, defines bracket slots, provisional
+  paths, and matchup context for Bracket Play.
+- `bracket.json`, when present, is the Bracket Play source of truth for
+  `bracket_id`, required matches, round names, allowed winners, round points,
+  final match, and third-place inclusion.
 - `claim-catalog.json` is the only valid source for Risk Play claims and
   required fields.
 - `fantasy-xi.md` and `risk-play.md` define scoring and validity rules.
-- `bracket-play.md` matters when bracket play is open.
+- `bracket-play.md` defines the one-time bracket-only run when Bracket Play is
+  open.
 - `daily-submission.schema.json` is the final output contract.
 - `daily-submission.json` shows the expected answer shape.
 - Team README and skill files are the team's strategy instructions.
 
 Do not add bracket picks unless the current workspace and output schema make
-bracket play active for this run.
+Bracket Play active for this run. When Bracket Play is the standalone
+bracket-only run, research the full knockout path and do not produce Fantasy XI
+or Risk Play fields unless the active schema explicitly asks for them.
 
 # Research Plan
 
@@ -164,6 +180,35 @@ Keep a compact mental table with these columns for each match:
 
 Use that table to improve the board-only XI. Do not put this table in the final
 answer.
+
+# Bracket Play Research
+
+When the run is bracket-only, switch from player-pick research to knockout
+research:
+
+- Read the active bracket rules and schema before choosing any winner.
+- Identify every valid team ID, match ID, round, and bracket slot from the
+  workspace.
+- Use `world-cup-standings.json` and `bracket-context.json` when present to
+  reason about provisional Round of 32 paths without inventing IDs.
+- When `matchday.json` has `phase: "bracket"`, switch fully into bracket
+  planning.
+- Read `bracket.json` before `matches.json`; use `matches.json` as context, not
+  as the final output contract.
+- When `official_knockout_fixtures_available` is false or the board status is
+  `planning_projection`, treat candidate-pool slots as unresolved and choose
+  only among listed `candidate_team_ids`.
+- For later knockout rounds, follow `source_match_ids` to propagate selected
+  winners through the tree.
+- Estimate team strength, route difficulty, recent form, injuries, suspensions,
+  goalkeeper quality, defensive stability, and penalty-shootout profile.
+- Compare likely champion, finalist, and semifinal paths before choosing early
+  upsets.
+- Take only justified upsets: tactical edge, health edge, market closeness,
+  fatigue, goalkeeper edge, or route leverage.
+- Do not blindly select every favorite, but do not manufacture chaos either.
+
+Use `pick-bracket` to convert this research into the final bracket JSON.
 
 # Good Public Sources
 

@@ -1,6 +1,6 @@
 ---
 name: final-answer-audit
-description: Validate the final daily submission JSON using a manual checklist before returning it.
+description: Validate the final submission JSON using a manual checklist before returning it.
 ---
 
 # Mission
@@ -8,15 +8,38 @@ description: Validate the final daily submission JSON using a manual checklist b
 Before final output, audit the candidate answer using read-only reasoning. The
 final response must be one JSON object and nothing else.
 
-# Required Final Shape
+# Required Daily Final Shape
 
-The final object must contain:
+For normal Daily Fantasy XI and Risk Play runs, the final object must contain:
 
 - `team_id`: the exact team ID supplied by the platform request.
 - `matchday_id`: the exact ID from `/workspace/game-board/matchday.json`.
 - `fantasy_xi`: exactly 11 unique player ID strings.
 - `risk_play`: either `null` or one valid claim object.
 - `strategy`: one short explanation sentence.
+
+# Required Bracket Final Shape
+
+For the one-time bracket-only run, the final object must follow the active
+Bracket Play schema exactly. Read `/workspace/rules/bracket-play.md` and the
+current output schema before auditing.
+
+During a bracket-only run:
+
+- Include the full bracket fields required by the schema.
+- Required top-level fields are `team_id`, `bracket_id`, `picks`, and
+  `champion_team_id`; `strategy` is optional.
+- Use only valid team IDs, match IDs, round IDs, and winner IDs from the
+  workspace.
+- Treat `phase: "bracket"` in `/workspace/game-board/matchday.json` as Bracket
+  Play activation.
+- Include picks for the full knockout tree.
+- Ensure `champion_team_id` exactly matches the final winner selected in the
+  bracket.
+- Do not include `fantasy_xi` or `risk_play` unless the active bracket schema
+  explicitly requires them.
+- If a `strategy` field is allowed, keep it to one sentence about champion path,
+  favorite/upset balance, and knockout risk posture.
 
 # Team ID
 
@@ -33,34 +56,48 @@ Verify all of this before returning:
   `/workspace/rules/risk-play.md` were applied.
 - The runtime `/workspace` files were treated as the source of truth for the
   Daily Answer Contract, not any stale remembered scoring or sample IDs.
-- `/workspace/rules/bracket-play.md` was considered only for active bracket
-  requirements.
+- `/workspace/rules/bracket-play.md` was considered for active bracket
+  requirements, especially the one-time bracket-only run.
 - The example in `/workspace/output-format/examples/daily-submission.json` was
   used only as a shape guide, not as a source of sample IDs.
-- Top-level object has `team_id`, `matchday_id`, `fantasy_xi`, `risk_play`, and
-  `strategy`.
 - No extra top-level fields are present unless the schema explicitly requires
   them.
 - `team_id` is non-empty and matches the platform request.
-- `matchday_id` equals the value in `/workspace/game-board/matchday.json`.
-- `fantasy_xi` has exactly 11 entries.
-- Every `fantasy_xi` entry is a string.
-- All 11 `fantasy_xi` values are unique.
-- Every selected ID exists in `/workspace/game-board/players.json`.
-- Every selected player is eligible for the current `matchday_id`.
-- Formation is legal:
+- For a normal daily run, top-level object has `team_id`, `matchday_id`,
+  `fantasy_xi`, `risk_play`, and `strategy`.
+- For a normal daily run, `matchday_id` equals the value in
+  `/workspace/game-board/matchday.json`.
+- For a normal daily run, `fantasy_xi` has exactly 11 entries.
+- For a normal daily run, every `fantasy_xi` entry is a string.
+- For a normal daily run, all 11 `fantasy_xi` values are unique.
+- For a normal daily run, every selected ID exists in
+  `/workspace/game-board/players.json`.
+- For a normal daily run, every selected player is eligible for the current
+  `matchday_id`.
+- For a normal daily run, formation is legal:
   - 1 GK
   - 3 to 5 DEF
   - 3 to 5 MID
   - 1 to 3 FWD
-- If `risk_play` is `null`, that is valid.
-- If `risk_play` is not `null`, `claim_id` exists in `/workspace/game-board/claim-catalog.json`.
-- If `risk_play` is not `null`, every required field from the selected claim is
-  present.
-- Every risk `match_id`, `team_id`, and `player_id` exists in the board files.
-- Risk play does not include `stake`, `bet_points`, or `stake_percent`.
-- Bracket fields are absent unless the current schema and bracket board require
-  bracket play for this run.
+- For a normal daily run, if `risk_play` is `null`, that is valid.
+- For a normal daily run, if `risk_play` is not `null`, `claim_id` exists in
+  `/workspace/game-board/claim-catalog.json`.
+- For a normal daily run, if `risk_play` is not `null`, every required field
+  from the selected claim is present.
+- For a normal daily run, every risk `match_id`, `team_id`, and `player_id`
+  exists in the board files.
+- For a normal daily run, Risk Play does not include `stake`, `bet_points`, or
+  `stake_percent`.
+- For knockout daily runs, extra time was counted for knockout final-score and
+  player-event Risk Play claims when claim wording supports it.
+- For knockout daily runs, penalty shootout goals were not counted as normal
+  Fantasy XI goals or standard Risk Play goals.
+- Knockout-only claims such as `match_goes_to_extra_time` and
+  `match_goes_to_penalties` came from `claim-catalog.json` and were treated as
+  Risk Play, not Bracket Play.
+- Bracket fields are absent for normal daily runs.
+- For a bracket-only run, Fantasy XI and Risk Play fields are absent unless the
+  active schema explicitly requires them.
 - Final answer has no Markdown, no comments, no explanations outside the JSON
   object, and no trailing notes.
 - `strategy` is concise and mentions the selection logic and risk posture.
@@ -139,6 +176,41 @@ Examples of valid shapes described in prose:
 - A player scoring claim needs `claim_id`, `match_id`, and `player_id`.
 - An exact score claim needs `claim_id`, `match_id`, `home_score`, and
   `away_score`.
+
+# Bracket Object Review
+
+For a bracket-only run, audit the bracket before returning:
+
+- Every predicted winner exists in the current team board.
+- Every referenced match, round, slot, or path ID exists in the active bracket
+  board or schema.
+- `bracket_id` equals `/workspace/game-board/bracket.json` `bracket_id`.
+- `picks` has one item for every required match in `bracket.json`.
+- Every `picks` item has exactly `round`, `match_id`, and `winner_team_id`.
+- No `picks` item has extra fields.
+- Every `round` value is one of `round_of_32`, `round_of_16`, `quarterfinal`,
+  `semifinal`, `third_place`, or `final`.
+- Every `winner_team_id` is allowed by `bracket.json` for that match or is
+  reachable from prior winners for derived later-round matches.
+- If `official_knockout_fixtures_available` is false or `board_status` is
+  `planning_projection`, unresolved Round of 32 teams came only from the
+  relevant match's `candidate_team_ids`.
+- The winner of each later round is reachable from the winners selected in prior
+  rounds.
+- Every match with `projection_status: "derived_from_future_results"` uses only
+  winners flowing from its `source_match_ids`.
+- Champion, finalists, and semifinalists form a coherent path.
+- `champion_team_id` matches the selected final winner.
+- Round weighting was respected: Round of 32 5, Round of 16 8, Quarterfinal 12,
+  Semifinal 18, Final / Champion 30.
+- `world-cup-standings.json` and `bracket-context.json` were used when present,
+  especially for provisional practice boards.
+- Upsets are justified by current evidence, not added randomly.
+- The champion pick has a plausible route through the projected bracket.
+- No stale sample IDs, placeholder teams, invented IDs, unsupported fields, or
+  old draw assumptions are present.
+- A third-place pick is included only if `bracket.json` has
+  `third_place_included: true`; otherwise no third-place pick is present.
 
 # Final Output Rule
 
