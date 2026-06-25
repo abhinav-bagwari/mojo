@@ -66,6 +66,11 @@ model:
 - GK save bonus: `2 * three_save_probability`
 - cards and own goals: subtract expected yellow, red, and own-goal penalties
 
+For knockout matches, do not credit penalty shootout goals as normal Fantasy XI
+goals. Shootouts may matter for team advancement and bracket reasoning, but they
+do not create ordinary player goal points unless `/workspace/rules/fantasy-xi.md`
+explicitly says otherwise.
+
 Do not overfit the numbers. The purpose is to compare options:
 
 - A safe starter who reaches 60 minutes is worth about 4 points before events.
